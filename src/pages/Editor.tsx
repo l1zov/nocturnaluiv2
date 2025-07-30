@@ -69,8 +69,24 @@ export function Editor() {
 
   
 
+  const handleExecute = async () => {
+    try {
+      await invoke('execute_script_command', { script: value });
+    } catch (error) {
+      console.error('script not executed:', error);
+    }
+  };
+
   return (
     <main className="flex-1 flex flex-col bg-transparent">
+      <div className="flex items-center p-2 bg-transparent">
+        <button
+          onClick={handleExecute}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+        >
+          Execute
+        </button>
+      </div>
       <div className={`flex-1 w-full h-full overflow-hidden`}>
         <AceEditor
           mode="lua"
