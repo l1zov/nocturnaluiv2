@@ -23,12 +23,49 @@ fn load_settings(app: tauri::AppHandle, key: String) -> Result<Option<String>, S
     Ok(store.get(key).and_then(|v| v.as_str().map(|s| s.to_string())))
 }
 
+#[tauri::command]
+async fn fetch_suggestions_command() -> Result<serde_json::Value, String> {
+    let client = reqwest::Client::new();
+    let response = client
+        .get("https://www.comet-ui.fun/api/v1/suggestions")
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if !response.status().is_success() {
+        return Err(format!("suggestions request failed: {}", response.status()));
+    }
+
+    let suggestions = response
+        .json::<serde_json::Value>()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(suggestions)
+}
+
+use tauri::Manager;
+use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![greet, save_settings, load_settings])
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            let window = app.get_webview_window("main").unwrap();
+
+            #[cfg(debug_assertions)]
+            window.open_devtools();
+
+            #[cfg(target_os = "macos")]
+            apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(16.0))
+                .expect("failed to apply vibrancy");
+
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![greet, save_settings, load_settings, fetch_suggestions_command])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

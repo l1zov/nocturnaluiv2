@@ -45,6 +45,7 @@ export interface ThemeColors {
 export interface Theme {
   name: string;
   colors: ThemeColors;
+  video?: string;
 }
 
-export type ThemeName = 'dark' | 'light' | 'midnight' | 'ocean';
+export type ThemeName = 'dark' | 'light' | 'pink-pastel' | 'dark-pink-pastel' | 'glassy' | 'ocean' | 'space';

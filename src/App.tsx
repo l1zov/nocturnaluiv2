@@ -3,9 +3,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Titlebar } from './components/Titlebar';
 import { Sidebar } from './components/Sidebar';
 import { MainContent } from './components/MainContent';
-import { ThemeProvider } from './context/ThemeContext';
+import { useTheme, ThemeProvider } from './context/ThemeContext';
 import { useThemeClasses } from './hooks/useThemeClasses';
+import VideoBackground from './components/VideoBackground';
 import { Settings } from './pages/Settings';
+import { Editor } from './pages/Editor';
 
 function App() {
   return (
@@ -18,21 +20,24 @@ function App() {
 }
 
 function Layout() {
-  const theme = useThemeClasses();
+  const themeClasses = useThemeClasses();
+  const { currentTheme } = useTheme();
 
   return (
-    <div className={theme.combine(
+    <div className={themeClasses.combine(
       "relative flex flex-col h-screen font-sans rounded-[10px] overflow-hidden",
-      theme.bg.primary,
-      theme.text.primary
+      themeClasses.bg.primary,
+      themeClasses.text.primary
     )}>
+      {currentTheme.video && <VideoBackground video={currentTheme.video} />}
       <div className="relative z-10 flex flex-col h-full">
         <Titlebar />
         <div className="flex flex-1">
           <Sidebar />
           <Routes>
             <Route path="/" element={<MainContent />} />
-            <Route path="/settings" element={<Settings />} />
+                        <Route path="/settings" element={<Settings />} />
+            <Route path="/editor" element={<Editor />} />
           </Routes>
         </div>
       </div>

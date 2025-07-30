@@ -122,6 +122,46 @@ export const darkPinkPastelTheme: Theme = {
   },
 };
 
+export const glassyTheme: Theme = {
+  name: 'glassy',
+  colors: {
+    background: {
+      primary: 'bg-zinc-900/70 backdrop-blur-xl',
+      secondary: 'bg-zinc-800/60 backdrop-blur-xl',
+      tertiary: 'bg-zinc-700/50 backdrop-blur-xl',
+      hover: 'hover:bg-white/10',
+      active: 'bg-white/10',
+    },
+    text: {
+      primary: 'text-white',
+      secondary: 'text-white/80',
+      tertiary: 'text-white/60',
+      muted: 'text-gray-400',
+      accent: 'text-cyan-400',
+    },
+    border: {
+      primary: 'border-white/20',
+      secondary: 'border-white/10',
+      accent: 'border-cyan-400',
+    },
+    accent: {
+      primary: 'bg-cyan-500',
+      secondary: 'bg-teal-500',
+      success: 'bg-green-500',
+      warning: 'bg-yellow-500',
+      error: 'bg-red-500',
+    },
+    focus: {
+      ring: 'focus:ring-cyan-500',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
 export const lightTheme: Theme = {
   name: 'light',
   colors: {
@@ -161,10 +201,10 @@ export const lightTheme: Theme = {
     },
   },
 };
-
 export const themes = {
   dark: darkTheme,
   light: lightTheme,
   'pink-pastel': pinkPastelTheme,
   'dark-pink-pastel': darkPinkPastelTheme,
+  glassy: glassyTheme,
 } as const;
