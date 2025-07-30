@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import AceEditor from 'react-ace';
 import { useTheme } from '../context/ThemeContext';
-import { useThemeClasses } from '../hooks/useThemeClasses';
 import { invoke } from '@tauri-apps/api/core';
 
 import 'ace-builds/src-noconflict/mode-lua';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/theme-tomorrow_night';
+import 'ace-builds/src-noconflict/theme-dracula';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import ace from 'ace-builds';
 
@@ -43,8 +43,7 @@ async function fetchSuggestions(): Promise<any[]> {
 fetchSuggestions();
 
 export function Editor() {
-  const { themeName } = useTheme();
-  const theme = useThemeClasses();
+  const { currentTheme } = useTheme();
   const [value, setValue] = React.useState('print("hello from nocturnal")');
 
   useEffect(() => {
@@ -68,14 +67,14 @@ export function Editor() {
     };
   }, []);
 
-  const editorTheme = themeName.includes('dark') || themeName.includes('glassy') ? 'tomorrow_night' : 'github';
+  
 
   return (
-    <main className="flex-1 flex flex-col p-4 bg-transparent">
-      <div className={`flex-1 w-full h-full rounded-md overflow-hidden border ${theme.border.primary}`}>
+    <main className="flex-1 flex flex-col bg-transparent">
+      <div className={`flex-1 w-full h-full overflow-hidden`}>
         <AceEditor
           mode="lua"
-          theme={editorTheme}
+          theme={currentTheme.editorTheme}
           onChange={(newValue) => setValue(newValue)}
           value={value}
           name="nocturnal_ace_editor"

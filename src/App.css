@@ -3,3 +3,29 @@
 body {
   font-family: sans-serif;
 }
+
+.ace_gutter {
+  background: transparent !important;
+}
+
+.theme-glassy .ace_editor,
+.theme-glassy .ace_content {
+  background: transparent !important;
+}
+
+.ace_gutter-active-line {
+  background: transparent !important;
+}
+.ace_cursor {
+  transition: all 0.05s linear;
+}
+
+.theme-dracula .ace_gutter-active-line,
+.theme-tomorrow-night .ace_gutter-active-line,
+.theme-glassy .ace_gutter-active-line {
+  color: #fff !important;
+}
+
+.theme-github .ace_gutter-active-line {
+  color: #000 !important;
+}

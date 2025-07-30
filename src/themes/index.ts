@@ -1,36 +1,37 @@
 import { Theme } from '../types/theme';
 
-export const darkTheme: Theme = {
-  name: 'dark',
+export const draculaTheme: Theme = {
+  name: 'dracula',
+  editorTheme: 'dracula',
   colors: {
     background: {
-      primary: 'bg-zinc-950',
-      secondary: 'bg-zinc-900',
-      tertiary: 'bg-zinc-800',
-      hover: 'hover:bg-white/5',
-      active: 'bg-white/5',
+      primary: 'bg-[#282a36]',
+      secondary: 'bg-[#3a3c4e]',
+      tertiary: 'bg-[#44475a]',
+      hover: 'hover:bg-[#44475a]/50',
+      active: 'bg-[#44475a]/50',
     },
     text: {
-      primary: 'text-white',
-      secondary: 'text-white/75',
-      tertiary: 'text-white/50',
-      muted: 'text-gray-400',
-      accent: 'text-blue-400',
+      primary: 'text-[#f8f8f2]',
+      secondary: 'text-[#f8f8f2]/75',
+      tertiary: 'text-[#f8f8f2]/50',
+      muted: 'text-[#6272a4]',
+      accent: 'text-[#bd93f9]',
     },
     border: {
-      primary: 'border-zinc-800',
-      secondary: 'border-zinc-700',
-      accent: 'border-blue-400',
+      primary: 'border-[#44475a]',
+      secondary: 'border-[#6272a4]',
+      accent: 'border-[#bd93f9]',
     },
     accent: {
-      primary: 'bg-blue-500',
-      secondary: 'bg-purple-500',
-      success: 'bg-green-500',
-      warning: 'bg-yellow-500',
-      error: 'bg-red-500',
+      primary: 'bg-[#bd93f9]',
+      secondary: 'bg-[#ff79c6]',
+      success: 'bg-[#50fa7b]',
+      warning: 'bg-[#f1fa8c]',
+      error: 'bg-[#ff5555]',
     },
     focus: {
-      ring: 'focus:ring-purple-500',
+      ring: 'focus:ring-[#bd93f9]',
     },
     controls: {
       close: 'bg-red-400',
@@ -40,38 +41,38 @@ export const darkTheme: Theme = {
   },
 };
 
-
-export const pinkPastelTheme: Theme = {
-  name: 'pink-pastel',
+export const tomorrowNightTheme: Theme = {
+  name: 'tomorrow-night',
+  editorTheme: 'tomorrow_night',
   colors: {
     background: {
-      primary: 'bg-rose-50',
-      secondary: 'bg-rose-100',
-      tertiary: 'bg-rose-200',
-      hover: 'hover:bg-rose-100/50',
-      active: 'bg-rose-100/50',
+      primary: 'bg-[#1d1f21]',
+      secondary: 'bg-[#282a2e]',
+      tertiary: 'bg-[#373b41]',
+      hover: 'hover:bg-[#373b41]/50',
+      active: 'bg-[#373b41]/50',
     },
     text: {
-      primary: 'text-rose-800',
-      secondary: 'text-rose-700',
-      tertiary: 'text-rose-500',
-      muted: 'text-rose-400',
-      accent: 'text-pink-400',
+      primary: 'text-[#c5c8c6]',
+      secondary: 'text-[#c5c8c6]/75',
+      tertiary: 'text-[#c5c8c6]/50',
+      muted: 'text-[#969896]',
+      accent: 'text-[#81a2be]',
     },
     border: {
-      primary: 'border-rose-200',
-      secondary: 'border-rose-300',
-      accent: 'border-pink-400',
+      primary: 'border-[#373b41]',
+      secondary: 'border-[#969896]',
+      accent: 'border-[#81a2be]',
     },
     accent: {
-      primary: 'bg-pink-300',
-      secondary: 'bg-fuchsia-300',
-      success: 'bg-green-400',
-      warning: 'bg-yellow-400',
-      error: 'bg-red-400',
+      primary: 'bg-[#81a2be]',
+      secondary: 'bg-[#b294bb]',
+      success: 'bg-[#b5bd68]',
+      warning: 'bg-[#f0c674]',
+      error: 'bg-[#cc6666]',
     },
     focus: {
-      ring: 'focus:ring-pink-400',
+      ring: 'focus:ring-[#81a2be]',
     },
     controls: {
       close: 'bg-red-400',
@@ -81,38 +82,38 @@ export const pinkPastelTheme: Theme = {
   },
 };
 
-
-export const darkPinkPastelTheme: Theme = {
-  name: 'dark-pink-pastel',
+export const githubTheme: Theme = {
+  name: 'github',
+  editorTheme: 'github',
   colors: {
     background: {
-      primary: 'bg-rose-200',
-      secondary: 'bg-rose-300',
-      tertiary: 'bg-rose-400',
-      hover: 'hover:bg-rose-300/50',
-      active: 'bg-rose-300/50',
+      primary: 'bg-[#ffffff]',
+      secondary: 'bg-[#f5f5f5]',
+      tertiary: 'bg-[#e8e8e8]',
+      hover: 'hover:bg-[#e8e8e8]/50',
+      active: 'bg-[#e8e8e8]/50',
     },
     text: {
-      primary: 'text-rose-950',
-      secondary: 'text-rose-900',
-      tertiary: 'text-rose-700',
-      muted: 'text-rose-600',
-      accent: 'text-pink-600',
+      primary: 'text-[#000000]',
+      secondary: 'text-[#000000]/75',
+      tertiary: 'text-[#000000]/50',
+      muted: 'text-[#998]',
+      accent: 'text-[#0086B3]',
     },
     border: {
-      primary: 'border-rose-400',
-      secondary: 'border-rose-500',
-      accent: 'border-pink-600',
+      primary: 'border-[#e8e8e8]',
+      secondary: 'border-[#998]',
+      accent: 'border-[#0086B3]',
     },
     accent: {
-      primary: 'bg-pink-400',
-      secondary: 'bg-fuchsia-400',
-      success: 'bg-green-500',
-      warning: 'bg-yellow-500',
-      error: 'bg-red-500',
+      primary: 'bg-[#0086B3]',
+      secondary: 'bg-[#D14]',
+      success: 'bg-[#099]',
+      warning: 'bg-[#009926]',
+      error: 'bg-[#D14]',
     },
     focus: {
-      ring: 'focus:ring-pink-400',
+      ring: 'focus:ring-[#0086B3]',
     },
     controls: {
       close: 'bg-red-400',
@@ -124,6 +125,7 @@ export const darkPinkPastelTheme: Theme = {
 
 export const glassyTheme: Theme = {
   name: 'glassy',
+  editorTheme: 'tomorrow_night',
   colors: {
     background: {
       primary: 'bg-zinc-900/70 backdrop-blur-xl',
@@ -162,49 +164,9 @@ export const glassyTheme: Theme = {
   },
 };
 
-export const lightTheme: Theme = {
-  name: 'light',
-  colors: {
-    background: {
-      primary: 'bg-white',
-      secondary: 'bg-gray-50',
-      tertiary: 'bg-gray-100',
-      hover: 'hover:bg-gray-100',
-      active: 'bg-gray-100',
-    },
-    text: {
-      primary: 'text-gray-900',
-      secondary: 'text-gray-700',
-      tertiary: 'text-gray-500',
-      muted: 'text-gray-400',
-      accent: 'text-blue-600',
-    },
-    border: {
-      primary: 'border-gray-200',
-      secondary: 'border-gray-300',
-      accent: 'border-blue-500',
-    },
-    accent: {
-      primary: 'bg-blue-500',
-      secondary: 'bg-purple-500',
-      success: 'bg-green-500',
-      warning: 'bg-yellow-500',
-      error: 'bg-red-500',
-    },
-    focus: {
-      ring: 'focus:ring-blue-500',
-    },
-    controls: {
-      close: 'bg-red-500',
-      minimize: 'bg-yellow-500',
-      maximize: 'bg-green-500',
-    },
-  },
-};
 export const themes = {
-  dark: darkTheme,
-  light: lightTheme,
-  'pink-pastel': pinkPastelTheme,
-  'dark-pink-pastel': darkPinkPastelTheme,
+  dracula: draculaTheme,
+  'tomorrow-night': tomorrowNightTheme,
+  github: githubTheme,
   glassy: glassyTheme,
 } as const;

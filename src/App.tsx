@@ -11,7 +11,7 @@ import { Editor } from './pages/Editor';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark">
+    <ThemeProvider defaultTheme="dracula">
       <Router>
         <Layout />
       </Router>
@@ -25,6 +25,7 @@ function Layout() {
 
   return (
     <div className={themeClasses.combine(
+      `theme-${currentTheme.name}`,
       "relative flex flex-col h-screen font-sans rounded-[10px] overflow-hidden",
       themeClasses.bg.primary,
       themeClasses.text.primary

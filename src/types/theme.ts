@@ -45,7 +45,8 @@ export interface ThemeColors {
 export interface Theme {
   name: string;
   colors: ThemeColors;
+  editorTheme: string;
   video?: string;
 }
 
-export type ThemeName = 'dark' | 'light' | 'pink-pastel' | 'dark-pink-pastel' | 'glassy' | 'ocean' | 'space';
+export type ThemeName = 'dracula' | 'tomorrow-night' | 'github' | 'glassy';
