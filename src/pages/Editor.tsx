@@ -1,10 +1,9 @@
-import React from 'react';
-import CodeMirror from '@uiw/react-codemirror';
-import { autocompletion, CompletionContext, acceptCompletion, completionStatus } from '@codemirror/autocomplete';
+import React, { useEffect, useRef } from 'react';
+import MonacoEditor, { OnMount } from '@monaco-editor/react';
+import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../hooks/useThemeClasses';
-import { keymap } from '@codemirror/view';
-import { indentMore } from '@codemirror/commands';
 import { invoke } from '@tauri-apps/api/core';
+import type * as monaco from 'monaco-editor';
 
 let suggestionCache: any[] = [];
 let suggestionsFetched = false;
@@ -38,59 +37,65 @@ async function fetchSuggestions(): Promise<any[]> {
 
 fetchSuggestions();
 
-async function luaCompletions(context: CompletionContext) {
-  const word = context.matchBefore(/\w*/);
-  if (!word || (word.from === word.to && !context.explicit)) {
-    return null;
-  }
-
-  const allSuggestions = await fetchSuggestions();
-
-  const filteredSuggestions = allSuggestions.filter(s => 
-    s.label && typeof s.label === 'string' && s.label.toLowerCase().startsWith(word.text.toLowerCase())
-  );
-
-  if (filteredSuggestions.length === 0) {
-    return null;
-  }
-
-  return {
-    from: word.from,
-    options: filteredSuggestions.map((s) => ({
-      label: s.label,
-      type: s.detail || 'keyword',
-      info: s.documentation,
-    })),
-  };
-}
-
-const luaCompletionExtension = autocompletion({ override: [luaCompletions] });
-
 export function Editor() {
+  const { themeName } = useTheme();
   const theme = useThemeClasses();
   const [value, setValue] = React.useState('print("hello from nocturnal")');
+  const completionProviderRef = useRef<monaco.IDisposable | null>(null);
 
-  const onChange = React.useCallback((val: string) => {
-    setValue(val);
+    const handleEditorDidMount: OnMount = (_editor, monaco) => {
+    if (completionProviderRef.current) {
+      completionProviderRef.current.dispose();
+    }
+
+    completionProviderRef.current = monaco.languages.registerCompletionItemProvider('lua', {
+      provideCompletionItems: async (model, position) => {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+
+        const allSuggestions = await fetchSuggestions();
+        
+        const monacoSuggestions = allSuggestions.map(s => ({
+          label: s.label,
+          kind: monaco.languages.CompletionItemKind.Keyword, // Or map from s.detail
+          insertText: s.label,
+          documentation: s.documentation,
+          range: range,
+        }));
+
+        return {
+          suggestions: monacoSuggestions,
+        };
+      },
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      completionProviderRef.current?.dispose();
+    };
   }, []);
 
   return (
     <main className="flex-1 flex flex-col p-4 bg-transparent">
       <div className={`flex-1 w-full h-full rounded-md overflow-hidden border ${theme.border.primary}`}>
-        <CodeMirror
-          value={value}
+                <MonacoEditor
           height="100%"
-          extensions={[luaCompletionExtension, keymap.of([{
-            key: "Tab",
-            run: (e) => {
-              if (completionStatus(e.state) === "active") {
-                return acceptCompletion(e);
-              }
-              return indentMore(e);
-            },
-          }])]}
-          onChange={onChange}
-          theme="dark"
+          language="lua"
+          value={value}
+          onMount={handleEditorDidMount}
+          onChange={(newValue: string | undefined) => setValue(newValue || '')}
+          theme={themeName.includes('dark') || themeName.includes('glassy') ? 'vs-dark' : 'vs-light'}
+                    loading={<div style={{ height: '100%', backgroundColor: themeName.includes('dark') || themeName.includes('glassy') ? '#1e1e1e' : '#ffffff' }} />}
+          options={{
+            renderLineHighlight: 'none',
+            renderLineHighlightOnlyWhenFocus: true,
+          }}
         />
       </div>
     </main>
