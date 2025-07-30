@@ -33,7 +33,7 @@ function Layout() {
       {currentTheme.video && <VideoBackground video={currentTheme.video} />}
       <div className="relative z-10 flex flex-col h-full">
         <Titlebar />
-        <div className="flex flex-1">
+        <div className="flex flex-1 overflow-hidden">
           <Sidebar />
           <Routes>
             <Route path="/" element={<MainContent />} />

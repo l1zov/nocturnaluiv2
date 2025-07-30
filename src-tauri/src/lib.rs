@@ -44,7 +44,8 @@ async fn fetch_suggestions_command() -> Result<serde_json::Value, String> {
     Ok(suggestions)
 }
 
-use tauri::Manager;
+use tauri::{Manager, State};
+use std::sync::Mutex;
 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 use reqwest::blocking::Client as BlockingClient;
 use std::time::Duration;
@@ -123,13 +124,25 @@ impl ConnectionManager {
 }
 
 #[tauri::command]
-fn execute_script_command(script: String) -> Result<(), String> {
-    let mut connection_manager = ConnectionManager::new();
-    match connection_manager.send(&script) {
+fn execute_script_command(
+    script: String,
+    state: State<Mutex<ConnectionManager>>,
+) -> Result<(), String> {
+    let mut manager = state.lock().unwrap();
+    match manager.send(&script) {
         Ok(true) => Ok(()),
-        Ok(false) => Err("error:".to_string()),
+        Ok(false) => Err("An unknown error occurred.".to_string()),
         Err(e) => Err(e),
     }
+}
+
+#[tauri::command]
+fn check_connection_command(state: State<Mutex<ConnectionManager>>) -> bool {
+    let mut manager = state.lock().unwrap();
+    if manager.port.is_some() {
+        return manager.check_connection(manager.port.unwrap());
+    }
+    manager.connect()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -138,6 +151,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
+        .manage(Mutex::new(ConnectionManager::new()))
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
 
@@ -150,7 +164,14 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet, save_settings, load_settings, fetch_suggestions_command, execute_script_command])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            save_settings,
+            load_settings,
+            fetch_suggestions_command,
+            execute_script_command,
+            check_connection_command
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
