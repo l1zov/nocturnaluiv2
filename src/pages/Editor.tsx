@@ -1,9 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import MonacoEditor, { OnMount } from '@monaco-editor/react';
+import React, { useEffect } from 'react';
+import AceEditor from 'react-ace';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import { invoke } from '@tauri-apps/api/core';
-import type * as monaco from 'monaco-editor';
+
+import 'ace-builds/src-noconflict/mode-lua';
+import 'ace-builds/src-noconflict/theme-github';
+import 'ace-builds/src-noconflict/theme-tomorrow_night';
+import 'ace-builds/src-noconflict/ext-language_tools';
+import ace from 'ace-builds';
 
 let suggestionCache: any[] = [];
 let suggestionsFetched = false;
@@ -41,63 +46,50 @@ export function Editor() {
   const { themeName } = useTheme();
   const theme = useThemeClasses();
   const [value, setValue] = React.useState('print("hello from nocturnal")');
-  const completionProviderRef = useRef<monaco.IDisposable | null>(null);
-
-    const handleEditorDidMount: OnMount = (_editor, monaco) => {
-    if (completionProviderRef.current) {
-      completionProviderRef.current.dispose();
-    }
-
-    completionProviderRef.current = monaco.languages.registerCompletionItemProvider('lua', {
-      provideCompletionItems: async (model, position) => {
-        const word = model.getWordUntilPosition(position);
-        const range = {
-          startLineNumber: position.lineNumber,
-          endLineNumber: position.lineNumber,
-          startColumn: word.startColumn,
-          endColumn: word.endColumn,
-        };
-
-        const allSuggestions = await fetchSuggestions();
-        
-        const monacoSuggestions = allSuggestions.map(s => ({
-          label: s.label,
-          kind: monaco.languages.CompletionItemKind.Keyword, // Or map from s.detail
-          insertText: s.label,
-          documentation: s.documentation,
-          range: range,
-        }));
-
-        return {
-          suggestions: monacoSuggestions,
-        };
-      },
-    });
-  };
 
   useEffect(() => {
+    const langTools = ace.require('ace/ext/language_tools');
+
+    const luaCompleter = {
+            getCompletions: async (_editor: any, _session: any, _pos: any, _prefix: any, callback: any) => {
+        const suggestions = await fetchSuggestions();
+        callback(null, suggestions.map((s: any) => ({
+          caption: s.label,
+          value: s.label,
+          meta: s.detail || 'keyword',
+          docHTML: s.documentation,
+        })));
+      },
+    };
+
+    langTools.addCompleter(luaCompleter);
+
     return () => {
-      completionProviderRef.current?.dispose();
     };
   }, []);
+
+  const editorTheme = themeName.includes('dark') || themeName.includes('glassy') ? 'tomorrow_night' : 'github';
 
   return (
     <main className="flex-1 flex flex-col p-4 bg-transparent">
       <div className={`flex-1 w-full h-full rounded-md overflow-hidden border ${theme.border.primary}`}>
-                <MonacoEditor
-          height="100%"
-          language="lua"
+        <AceEditor
+          mode="lua"
+          theme={editorTheme}
+          onChange={(newValue) => setValue(newValue)}
           value={value}
-          onMount={handleEditorDidMount}
-          onChange={(newValue: string | undefined) => setValue(newValue || '')}
-          theme={themeName.includes('dark') || themeName.includes('glassy') ? 'vs-dark' : 'vs-light'}
-                    loading={<div style={{ height: '100%', backgroundColor: themeName.includes('dark') || themeName.includes('glassy') ? '#1e1e1e' : '#ffffff' }} />}
-          options={{
-            renderLineHighlight: 'none',
-            renderLineHighlightOnlyWhenFocus: true,
+          name="nocturnal_ace_editor"
+          height="100%"
+          width="100%"
+          editorProps={{ $blockScrolling: true }}
+          setOptions={{
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            highlightActiveLine: false,
           }}
         />
       </div>
     </main>
   );
 }
+
