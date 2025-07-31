@@ -177,7 +177,7 @@ export function Editor() {
   };
 
   return (
-    <main className="flex-1 flex flex-col bg-transparent">
+    <div className="flex-1 relative overflow-y-auto">
                   <div className={theme.combine("flex items-center border-b", theme.border.primary)}>
         {tabs.map(tab => {
           const isActive = activeTab?.id === tab.id;
@@ -279,7 +279,7 @@ export function Editor() {
           Execute
         </button>
       </div>
-    </main>
+    </div>
   );
 }
 
