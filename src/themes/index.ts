@@ -15,7 +15,7 @@ export const draculaTheme: Theme = {
       primary: 'text-[#f8f8f2]',
       secondary: 'text-[#f8f8f2]/75',
       tertiary: 'text-[#f8f8f2]/50',
-      muted: 'text-[#818ba9]',
+      muted: 'text-[#b4bdde]',
       accent: 'text-[#bd93f9]',
     },
     border: {
@@ -97,7 +97,7 @@ export const githubTheme: Theme = {
       primary: 'text-[#000000]',
       secondary: 'text-[#000000]/75',
       tertiary: 'text-[#000000]/50',
-      muted: 'text-[#808072]',
+      muted: 'text-[#4a5057]',
       accent: 'text-[#0086B3]',
     },
     border: {
@@ -138,7 +138,7 @@ export const glassyTheme: Theme = {
       primary: 'text-white',
       secondary: 'text-white/80',
       tertiary: 'text-white/60',
-      muted: 'text-gray-500',
+      muted: 'text-gray-300',
       accent: 'text-cyan-400',
     },
     border: {
@@ -179,7 +179,7 @@ export const cobaltTheme: Theme = {
       primary: 'text-[#FFFFFF]',
       secondary: 'text-[#FFFFFF]/75',
       tertiary: 'text-[#FFFFFF]/50',
-      muted: 'text-[#96a3af]',
+      muted: 'text-[#b8c5d1]',
       accent: 'text-[#FF9D00]',
     },
     border: {
@@ -261,7 +261,7 @@ export const twilightTheme: Theme = {
       primary: 'text-[#F8F8F8]',
       secondary: 'text-[#F8F8F8]/75',
       tertiary: 'text-[#F8F8F8]/50',
-      muted: 'text-[#827e83]',
+      muted: 'text-[#b3b3b3]',
       accent: 'text-[#CDA869]',
     },
     border: {

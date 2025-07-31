@@ -54,7 +54,8 @@ export function Editor() {
   const [activeTab, setActiveTab] = useState<any>(null);
   const [showCloseButton, setShowCloseButton] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [isPressed, setIsPressed] = useState(false);
+    const [isPressed, setIsPressed] = useState(false);
+  const [closingTabId, setClosingTabId] = useState<number | null>(null);
 
   let hoverTimeout: number;
 
@@ -185,19 +186,24 @@ export function Editor() {
     setShowCloseButton(null);
   };
 
-  const handleCloseTab = async (id: number) => {
-    try {
-      const updatedTabs: any = await invoke('close_tab', { id });
-      setTabs(updatedTabs);
-      if (updatedTabs.length > 0) {
-        const newActiveTab = await invoke('get_active_tab');
-        setActiveTab(newActiveTab);
-      } else {
-        setActiveTab(null);
+    const handleCloseTab = (id: number) => {
+    setClosingTabId(id);
+
+    setTimeout(async () => {
+      try {
+        const updatedTabs: any = await invoke('close_tab', { id });
+        setTabs(updatedTabs);
+        if (updatedTabs.length > 0) {
+          const newActiveTab = await invoke('get_active_tab');
+          setActiveTab(newActiveTab);
+        } else {
+          setActiveTab(null);
+        }
+      } catch (error) {
+        console.error("close tab error:", error);
       }
-    } catch (error) {
-      console.error("close tab error:", error);
-    }
+      setClosingTabId(null);
+    }, 300);
   };
 
   const handleExecute = async () => {
@@ -226,7 +232,8 @@ export function Editor() {
                 isActive ? theme.text.primary : theme.text.secondary,
                 isActive ? "font-medium" : "font-normal",
                 `border-b ${theme.border.primary}`,
-                showCloseButton === tab.id ? "px-3 pr-8" : "px-3"
+                                showCloseButton === tab.id ? "px-3 pr-8" : "px-3",
+                closingTabId === tab.id ? 'tab-closing' : ''
               )}
               style={{ marginBottom: '-1px' }}
             >
@@ -235,7 +242,7 @@ export function Editor() {
                 onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }}
                 className={theme.combine(
                   "absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity duration-300 ease-in-out",
-                  showCloseButton === tab.id ? "opacity-100" : "opacity-0",
+                                    showCloseButton === tab.id ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
                   theme.bg.hover
                 )}
               >

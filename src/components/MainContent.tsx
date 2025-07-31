@@ -4,7 +4,7 @@ export function MainContent() {
   const theme = useThemeClasses();
   
   const updates = [
-    { version: '1.2.1 LTS', description: 'Fixed known bugs. First LTS version!' },
+    { version: 'dev 1', description: 'v2 first dev version' },
   ];
 
   return (
