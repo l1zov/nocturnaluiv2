@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import AceEditor from 'react-ace';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../hooks/useThemeClasses';
@@ -48,8 +49,11 @@ export function Editor() {
   const theme = useThemeClasses();
   const [tabs, setTabs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<any>(null);
+  const [showCloseButton, setShowCloseButton] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
+
+  let hoverTimeout: number;
 
   useEffect(() => {
     const langTools = ace.require('ace/ext/language_tools');
@@ -123,6 +127,8 @@ export function Editor() {
   };
 
   const handleTabClick = async (id: number) => {
+    clearTimeout(hoverTimeout);
+    setShowCloseButton(null);
     try {
       await invoke('set_active_tab', { id });
       const newActiveTab = tabs.find(t => t.id === id);
@@ -132,6 +138,18 @@ export function Editor() {
     } catch (error) {
       console.error("active tab error:", error);
     }
+  };
+
+  const handleTabMouseEnter = (id: number) => {
+    clearTimeout(hoverTimeout);
+    hoverTimeout = setTimeout(() => {
+      setShowCloseButton(id);
+    }, 1000);
+  };
+
+  const handleTabMouseLeave = () => {
+    clearTimeout(hoverTimeout);
+    setShowCloseButton(null);
   };
 
   const handleCloseTab = async (id: number) => {
@@ -160,17 +178,51 @@ export function Editor() {
 
   return (
     <main className="flex-1 flex flex-col bg-transparent">
-      <div className="flex items-center border-b border-gray-700">
-        {tabs.map(tab => (
-          <div
-            key={tab.id}
-            onClick={() => handleTabClick(tab.id)}
-            className={`flex items-center px-4 py-2 cursor-pointer text-sm ${activeTab?.id === tab.id ? 'bg-gray-800 border-b-2 border-blue-500' : 'hover:bg-gray-700'}`}>
-            <span>{tab.title}</span>
-            <button onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }} className="ml-2 text-gray-400 hover:text-white">x</button>
-          </div>
-        ))}
-        <button onClick={handleAddTab} className="px-3 py-2 text-sm hover:bg-gray-700">+</button>
+                  <div className={theme.combine("flex items-center border-b", theme.border.primary)}>
+        {tabs.map(tab => {
+          const isActive = activeTab?.id === tab.id;
+          return (
+                                    <div
+              key={tab.id}
+              onClick={() => handleTabClick(tab.id)}
+              onMouseEnter={() => handleTabMouseEnter(tab.id)}
+              onMouseLeave={handleTabMouseLeave}
+              className={theme.combine(
+                "relative flex items-center h-7 cursor-pointer text-sm border-r transition-all duration-200 ease-in-out",
+                isActive ? theme.bg.secondary : "bg-transparent",
+                isActive ? theme.text.primary : theme.text.secondary,
+                isActive ? "font-medium" : "font-normal",
+                `border-b ${theme.border.primary}`,
+                showCloseButton === tab.id ? "px-3 pr-8" : "px-3"
+              )}
+              style={{ marginBottom: '-1px' }}
+            >
+              <span>{tab.title}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }}
+                className={theme.combine(
+                  "absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity duration-300 ease-in-out",
+                  showCloseButton === tab.id ? "opacity-100" : "opacity-0",
+                  theme.bg.hover
+                )}
+              >
+                <X size={14} className={theme.text.muted} />
+              </button>
+            </div>
+          );
+        })}
+                <button
+          onClick={handleAddTab}
+          className={theme.combine(
+            "px-2 h-7 text-sm border-r border-b",
+            theme.text.secondary,
+            theme.border.primary,
+            theme.bg.hover
+          )}
+          style={{ marginBottom: '-1px' }}
+        >
+          +
+        </button>
       </div>
       <div className={`flex-1 w-full h-full overflow-hidden`}>
         <AceEditor
