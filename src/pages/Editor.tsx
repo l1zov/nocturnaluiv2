@@ -56,6 +56,36 @@ export function Editor() {
   let hoverTimeout: number;
 
   useEffect(() => {
+    const styleId = 'dynamic-scrollbar-styles';
+    let styleElement = document.getElementById(styleId) as HTMLStyleElement | null;
+
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = styleId;
+      document.head.appendChild(styleElement);
+    }
+
+    styleElement.innerHTML = `
+      .ace_scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .ace_scrollbar::-webkit-scrollbar-thumb {
+        background: #88888880;
+        border-radius: 4px;
+        border-right: 2px solid transparent;
+        background-clip: padding-box;
+      }
+      .ace_scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #55555580;
+      }
+      .ace_scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+    `;
+  }, []);
+
+  useEffect(() => {
     const langTools = ace.require('ace/ext/language_tools');
 
     const luaCompleter = {
