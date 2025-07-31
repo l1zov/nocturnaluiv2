@@ -40,3 +40,8 @@ body {
 .theme-github .ace_gutter-active-line {
   color: #000 !important;
 }
+/* hide hidden caret*/
+.ace_hidden-cursors .ace_cursor {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
