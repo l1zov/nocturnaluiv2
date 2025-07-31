@@ -9,6 +9,9 @@ import 'ace-builds/src-noconflict/mode-lua';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/theme-tomorrow_night';
 import 'ace-builds/src-noconflict/theme-dracula';
+import 'ace-builds/src-noconflict/theme-cobalt';
+import 'ace-builds/src-noconflict/theme-terminal';
+import 'ace-builds/src-noconflict/theme-twilight';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import ace from 'ace-builds';
 
@@ -207,7 +210,7 @@ export function Editor() {
   };
 
   return (
-    <div className="flex-1 relative overflow-y-auto">
+    <div className="flex-1 flex flex-col bg-transparent">
                   <div className={theme.combine("flex items-center border-b", theme.border.primary)}>
         {tabs.map(tab => {
           const isActive = activeTab?.id === tab.id;
