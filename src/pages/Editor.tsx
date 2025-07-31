@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AceEditor from 'react-ace';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../hooks/useThemeClasses';
@@ -46,7 +46,8 @@ fetchSuggestions();
 export function Editor() {
   const { currentTheme } = useTheme();
   const theme = useThemeClasses();
-  const [value, setValue] = React.useState('print("hello from nocturnal")');
+  const [tabs, setTabs] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<any>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
@@ -79,6 +80,19 @@ export function Editor() {
     checkConnection();
     const interval = setInterval(checkConnection, 1000);
 
+    const initTabs = async () => {
+      try {
+        const initialTabs = await invoke('get_tabs');
+        const initialActiveTab = await invoke('get_active_tab');
+        setTabs(initialTabs as any[]);
+        setActiveTab(initialActiveTab);
+      } catch (error) {
+        console.error("get tabs error:", error);
+      }
+    };
+
+    initTabs();
+
     return () => {
       clearInterval(interval);
     };
@@ -86,10 +100,59 @@ export function Editor() {
 
   
 
-  const handleExecute = async () => {
-    if (!isConnected) return;
+  const handleEditorChange = (newContent: string) => {
+    if (!activeTab) return;
+
+    const updatedActiveTab = { ...activeTab, content: newContent };
+    setActiveTab(updatedActiveTab);
+
+    setTabs(tabs.map(tab => tab.id === activeTab.id ? updatedActiveTab : tab));
+
+    invoke('update_tab_content', { id: activeTab.id, content: newContent });
+  };
+
+  const handleAddTab = async () => {
     try {
-      await invoke('execute_script_command', { script: value });
+      const newTab = await invoke('add_tab');
+      const updatedTabs: any = await invoke('get_tabs');
+      setTabs(updatedTabs);
+      setActiveTab(newTab);
+    } catch (error) {
+      console.error("add tab error:", error);
+    }
+  };
+
+  const handleTabClick = async (id: number) => {
+    try {
+      await invoke('set_active_tab', { id });
+      const newActiveTab = tabs.find(t => t.id === id);
+      if (newActiveTab) {
+        setActiveTab(newActiveTab);
+      }
+    } catch (error) {
+      console.error("active tab error:", error);
+    }
+  };
+
+  const handleCloseTab = async (id: number) => {
+    try {
+      const updatedTabs: any = await invoke('close_tab', { id });
+      setTabs(updatedTabs);
+      if (updatedTabs.length > 0) {
+        const newActiveTab = await invoke('get_active_tab');
+        setActiveTab(newActiveTab);
+      } else {
+        setActiveTab(null);
+      }
+    } catch (error) {
+      console.error("close tab error:", error);
+    }
+  };
+
+  const handleExecute = async () => {
+    if (!isConnected || !activeTab) return;
+    try {
+      await invoke('execute_script_command', { script: activeTab.content });
     } catch (error) {
       console.error('script not executed:', error);
     }
@@ -97,12 +160,24 @@ export function Editor() {
 
   return (
     <main className="flex-1 flex flex-col bg-transparent">
-      <div className={`flex-1 w-full h-full overflow-hidden mt-2`}>
+      <div className="flex items-center border-b border-gray-700">
+        {tabs.map(tab => (
+          <div
+            key={tab.id}
+            onClick={() => handleTabClick(tab.id)}
+            className={`flex items-center px-4 py-2 cursor-pointer text-sm ${activeTab?.id === tab.id ? 'bg-gray-800 border-b-2 border-blue-500' : 'hover:bg-gray-700'}`}>
+            <span>{tab.title}</span>
+            <button onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }} className="ml-2 text-gray-400 hover:text-white">x</button>
+          </div>
+        ))}
+        <button onClick={handleAddTab} className="px-3 py-2 text-sm hover:bg-gray-700">+</button>
+      </div>
+      <div className={`flex-1 w-full h-full overflow-hidden`}>
         <AceEditor
           mode="lua"
           theme={currentTheme.editorTheme}
-          onChange={(newValue) => setValue(newValue)}
-          value={value}
+          onChange={handleEditorChange}
+          value={activeTab?.content || ''}
           name="nocturnal_ace_editor"
           height="100%"
           width="100%"

@@ -4,6 +4,8 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+mod tabs;
+
 use std::path::PathBuf;
 use tauri_plugin_store::StoreExt;
 
@@ -11,7 +13,7 @@ const SETTINGS_PATH: &str = ".settings.dat";
 
 #[tauri::command]
 fn save_settings(app: tauri::AppHandle, key: String, value: String) -> Result<(), String> {
-    let mut store = app.store(PathBuf::from(SETTINGS_PATH)).map_err(|e| e.to_string())?;
+    let store = app.store(PathBuf::from(SETTINGS_PATH)).map_err(|e| e.to_string())?;
     store.set(key, value);
     store.save().map_err(|e| e.to_string())?;
     Ok(())
@@ -153,6 +155,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(Mutex::new(ConnectionManager::new()))
         .setup(|app| {
+            app.manage(tabs::AppState::new(&app.handle()));
             let window = app.get_webview_window("main").unwrap();
 
             #[cfg(debug_assertions)]
@@ -170,7 +173,13 @@ pub fn run() {
             load_settings,
             fetch_suggestions_command,
             execute_script_command,
-            check_connection_command
+            check_connection_command,
+            tabs::get_tabs,
+            tabs::get_active_tab,
+            tabs::add_tab,
+            tabs::close_tab,
+            tabs::set_active_tab,
+            tabs::update_tab_content
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

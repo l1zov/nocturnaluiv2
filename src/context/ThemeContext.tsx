@@ -27,7 +27,7 @@ interface ThemeProviderProps {
   defaultTheme?: AvailableThemes;
 }
 
-export function ThemeProvider({ children, defaultTheme = 'dark' }: ThemeProviderProps) {
+export function ThemeProvider({ children, defaultTheme = 'dracula' }: ThemeProviderProps) {
   const [themeName, setThemeName] = useState<AvailableThemes>(defaultTheme);
   const [loading, setLoading] = useState(true);
   const currentTheme = themes[themeName];
