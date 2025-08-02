@@ -84,36 +84,36 @@ export const tomorrowNightTheme: Theme = {
 
 export const githubTheme: Theme = {
   name: 'github',
-  editorTheme: 'github',
+  editorTheme: 'tomorrow_night', // Changed from 'github' to dark theme
   colors: {
     background: {
-      primary: 'bg-[#ffffff]',
-      secondary: 'bg-[#f5f5f5]',
-      tertiary: 'bg-[#e8e8e8]',
-      hover: 'hover:bg-[#e8e8e8]/50',
-      active: 'bg-[#e8e8e8]/50',
+      primary: 'bg-[#0d1117]', // Changed to dark GitHub color
+      secondary: 'bg-[#161b22]', // Changed to dark GitHub color
+      tertiary: 'bg-[#21262d]', // Changed to dark GitHub color
+      hover: 'hover:bg-[#21262d]/50',
+      active: 'bg-[#21262d]/50',
     },
     text: {
-      primary: 'text-[#000000]',
-      secondary: 'text-[#000000]/75',
-      tertiary: 'text-[#000000]/50',
-      muted: 'text-[#998]',
-      accent: 'text-[#0086B3]',
+      primary: 'text-[#e6edf3]', // Changed to light text
+      secondary: 'text-[#e6edf3]/75',
+      tertiary: 'text-[#e6edf3]/50',
+      muted: 'text-[#7d8590]', // Changed to GitHub dark muted color
+      accent: 'text-[#58a6ff]', // Changed to GitHub blue
     },
     border: {
-      primary: 'border-[#e8e8e8]',
-      secondary: 'border-[#998]',
-      accent: 'border-[#0086B3]',
+      primary: 'border-[#30363d]', // Changed to dark border
+      secondary: 'border-[#7d8590]',
+      accent: 'border-[#58a6ff]', // Changed to GitHub blue
     },
     accent: {
-      primary: 'bg-[#0086B3]',
-      secondary: 'bg-[#D14]',
-      success: 'bg-[#099]',
-      warning: 'bg-[#009926]',
-      error: 'bg-[#D14]',
+      primary: 'bg-[#58a6ff]', // Changed to GitHub blue
+      secondary: 'bg-[#f85149]', // Changed to GitHub red
+      success: 'bg-[#3fb950]', // Changed to GitHub green
+      warning: 'bg-[#d29922]', // Changed to GitHub yellow
+      error: 'bg-[#f85149]', // Changed to GitHub red
     },
     focus: {
-      ring: 'focus:ring-[#0086B3]',
+      ring: 'focus:ring-[#58a6ff]', // Changed to GitHub blue
     },
     controls: {
       close: 'bg-red-400',
@@ -164,9 +164,219 @@ export const glassyTheme: Theme = {
   },
 };
 
+export const monokaiTheme: Theme = {
+  name: 'monokai',
+  editorTheme: 'monokai',
+  colors: {
+    background: {
+      primary: 'bg-[#272822]',
+      secondary: 'bg-[#3e3d32]',
+      tertiary: 'bg-[#49483e]',
+      hover: 'hover:bg-[#49483e]/50',
+      active: 'bg-[#49483e]/50',
+    },
+    text: {
+      primary: 'text-[#f8f8f2]',
+      secondary: 'text-[#f8f8f2]/75',
+      tertiary: 'text-[#f8f8f2]/50',
+      muted: 'text-[#75715e]',
+      accent: 'text-[#a6e22e]',
+    },
+    border: {
+      primary: 'border-[#49483e]',
+      secondary: 'border-[#75715e]',
+      accent: 'border-[#a6e22e]',
+    },
+    accent: {
+      primary: 'bg-[#a6e22e]',
+      secondary: 'bg-[#f92672]',
+      success: 'bg-[#a6e22e]',
+      warning: 'bg-[#e6db74]',
+      error: 'bg-[#f92672]',
+    },
+    focus: {
+      ring: 'focus:ring-[#a6e22e]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
+export const solarizedDarkTheme: Theme = {
+  name: 'solarized-dark',
+  editorTheme: 'solarized_dark',
+  colors: {
+    background: {
+      primary: 'bg-[#002b36]',
+      secondary: 'bg-[#073642]',
+      tertiary: 'bg-[#586e75]',
+      hover: 'hover:bg-[#586e75]/50',
+      active: 'bg-[#586e75]/50',
+    },
+    text: {
+      primary: 'text-[#839496]',
+      secondary: 'text-[#839496]/75',
+      tertiary: 'text-[#839496]/50',
+      muted: 'text-[#657b83]',
+      accent: 'text-[#268bd2]',
+    },
+    border: {
+      primary: 'border-[#586e75]',
+      secondary: 'border-[#657b83]',
+      accent: 'border-[#268bd2]',
+    },
+    accent: {
+      primary: 'bg-[#268bd2]',
+      secondary: 'bg-[#d33682]',
+      success: 'bg-[#859900]',
+      warning: 'bg-[#b58900]',
+      error: 'bg-[#dc322f]',
+    },
+    focus: {
+      ring: 'focus:ring-[#268bd2]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
+export const cyberpunkTheme: Theme = {
+  name: 'cyberpunk',
+  editorTheme: 'vibrant_ink',
+  colors: {
+    background: {
+      primary: 'bg-[#0a0a0a]',
+      secondary: 'bg-[#1a1a2e]',
+      tertiary: 'bg-[#16213e]',
+      hover: 'hover:bg-[#ff00ff]/20',
+      active: 'bg-[#ff00ff]/20',
+    },
+    text: {
+      primary: 'text-[#00ffff]',
+      secondary: 'text-[#00ffff]/75',
+      tertiary: 'text-[#00ffff]/50',
+      muted: 'text-[#8892b0]',
+      accent: 'text-[#ff00ff]',
+    },
+    border: {
+      primary: 'border-[#ff00ff]',
+      secondary: 'border-[#00ffff]',
+      accent: 'border-[#ff00ff]',
+    },
+    accent: {
+      primary: 'bg-[#ff00ff]',
+      secondary: 'bg-[#00ffff]',
+      success: 'bg-[#00ff00]',
+      warning: 'bg-[#ffff00]',
+      error: 'bg-[#ff0040]',
+    },
+    focus: {
+      ring: 'focus:ring-[#ff00ff]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
+export const nordTheme: Theme = {
+  name: 'nord',
+  editorTheme: 'tomorrow_night',
+  colors: {
+    background: {
+      primary: 'bg-[#2e3440]',
+      secondary: 'bg-[#3b4252]',
+      tertiary: 'bg-[#434c5e]',
+      hover: 'hover:bg-[#434c5e]/50',
+      active: 'bg-[#434c5e]/50',
+    },
+    text: {
+      primary: 'text-[#eceff4]',
+      secondary: 'text-[#eceff4]/75',
+      tertiary: 'text-[#eceff4]/50',
+      muted: 'text-[#d8dee9]',
+      accent: 'text-[#88c0d0]',
+    },
+    border: {
+      primary: 'border-[#434c5e]',
+      secondary: 'border-[#d8dee9]',
+      accent: 'border-[#88c0d0]',
+    },
+    accent: {
+      primary: 'bg-[#88c0d0]',
+      secondary: 'bg-[#81a1c1]',
+      success: 'bg-[#a3be8c]',
+      warning: 'bg-[#ebcb8b]',
+      error: 'bg-[#bf616a]',
+    },
+    focus: {
+      ring: 'focus:ring-[#88c0d0]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
+export const catppuccinTheme: Theme = {
+  name: 'catppuccin',
+  editorTheme: 'dracula',
+  colors: {
+    background: {
+      primary: 'bg-[#1e1e2e]',
+      secondary: 'bg-[#313244]',
+      tertiary: 'bg-[#45475a]',
+      hover: 'hover:bg-[#45475a]/50',
+      active: 'bg-[#45475a]/50',
+    },
+    text: {
+      primary: 'text-[#cdd6f4]',
+      secondary: 'text-[#cdd6f4]/75',
+      tertiary: 'text-[#cdd6f4]/50',
+      muted: 'text-[#6c7086]',
+      accent: 'text-[#cba6f7]',
+    },
+    border: {
+      primary: 'border-[#45475a]',
+      secondary: 'border-[#6c7086]',
+      accent: 'border-[#cba6f7]',
+    },
+    accent: {
+      primary: 'bg-[#cba6f7]',
+      secondary: 'bg-[#f38ba8]',
+      success: 'bg-[#a6e3a1]',
+      warning: 'bg-[#f9e2af]',
+      error: 'bg-[#f38ba8]',
+    },
+    focus: {
+      ring: 'focus:ring-[#cba6f7]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
 export const themes = {
   dracula: draculaTheme,
   'tomorrow-night': tomorrowNightTheme,
   github: githubTheme,
   glassy: glassyTheme,
+  monokai: monokaiTheme,
+  'solarized-dark': solarizedDarkTheme,
+  cyberpunk: cyberpunkTheme,
+  nord: nordTheme,
+  catppuccin: catppuccinTheme,
 } as const;

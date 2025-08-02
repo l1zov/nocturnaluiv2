@@ -147,6 +147,71 @@ fn check_connection_command(state: State<Mutex<ConnectionManager>>) -> bool {
     manager.connect()
 }
 
+#[tauri::command]
+fn get_connected_port_command(state: State<Mutex<ConnectionManager>>) -> Option<u16> {
+    let manager = state.lock().unwrap();
+    manager.port
+}
+
+#[tauri::command]
+async fn save_script_to_file(filename: String, content: String) -> Result<(), String> {
+    use std::fs;
+    use std::path::Path;
+    
+    // Create Scripts directory if it doesn't exist
+    let scripts_dir = Path::new("Scripts");
+    if !scripts_dir.exists() {
+        fs::create_dir(scripts_dir).map_err(|e| format!("Failed to create Scripts directory: {}", e))?;
+    }
+    
+    // Save the file
+    let file_path = scripts_dir.join(&filename);
+    fs::write(&file_path, content).map_err(|e| format!("Failed to save file: {}", e))?;
+    
+    Ok(())
+}
+
+#[tauri::command]
+async fn open_downloads_folder() -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        use std::process::Command;
+        let home_dir = std::env::var("HOME").map_err(|_| "Could not get home directory")?;
+        let downloads_path = format!("{}/Downloads", home_dir);
+        
+        Command::new("open")
+            .arg(&downloads_path)
+            .spawn()
+            .map_err(|e| format!("Failed to open Downloads folder: {}", e))?;
+    }
+    
+    #[cfg(target_os = "windows")]
+    {
+        use std::process::Command;
+        let user_profile = std::env::var("USERPROFILE").map_err(|_| "Could not get user profile")?;
+        let downloads_path = format!("{}\\Downloads", user_profile);
+        
+        Command::new("explorer")
+            .arg(&downloads_path)
+            .spawn()
+            .map_err(|e| format!("Failed to open Downloads folder: {}", e))?;
+    }
+    
+    #[cfg(target_os = "linux")]
+    {
+        use std::process::Command;
+        let home_dir = std::env::var("HOME").map_err(|_| "Could not get home directory")?;
+        let downloads_path = format!("{}/Downloads", home_dir);
+        
+        Command::new("xdg-open")
+            .arg(&downloads_path)
+            .spawn()
+            .map_err(|e| format!("Failed to open Downloads folder: {}", e))?;
+    }
+    
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -174,6 +239,9 @@ pub fn run() {
             fetch_suggestions_command,
             execute_script_command,
             check_connection_command,
+            get_connected_port_command,
+            save_script_to_file,
+            open_downloads_folder,
             tabs::get_tabs,
             tabs::get_active_tab,
             tabs::add_tab,
