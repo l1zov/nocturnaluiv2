@@ -30,3 +30,81 @@ body {
 .theme-github .ace_gutter-active-line {
   color: #000 !important;
 }
+
+/* Snow Animation for Login */
+@keyframes snowfall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.animate-snow {
+  animation: snowfall linear infinite;
+}
+
+/* Walking Guy Animation for Login */
+@keyframes walk {
+  0% {
+    left: -100px;
+  }
+  100% {
+    left: calc(100% + 100px);
+  }
+}
+
+.animate-walk {
+  animation: walk 15s linear infinite;
+}
+
+/* Slider Styling */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-track {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: #f0f0f0;
+  transform: scale(1.1);
+}
+
+.slider::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+}
+
+.slider::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}

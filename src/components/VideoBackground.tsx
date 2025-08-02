@@ -1,10 +1,8 @@
-import React from 'react';
-
-interface VideoBackgroundProps {
+interface Props {
   video: string;
 }
 
-const VideoBackground: React.FC<VideoBackgroundProps> = ({ video }) => {
+const VideoBackground = ({ video }: Props) => {
   return (
     <video
       autoPlay
