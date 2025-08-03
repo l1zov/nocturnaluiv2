@@ -38,7 +38,7 @@ DMG_NAME=$(basename "$DMG_URL")
 DOWNLOAD_PATH="/tmp/$DMG_NAME"
 
 echo "Downloading the latest release: $DMG_NAME"
-curl -L -o "$DOWNLOAD_PATH" "$DMG_URL"
+curl -sSL -o "$DOWNLOAD_PATH" "$DMG_URL"
 
 if [ $? -ne 0 ]; then
     echo "DMG file failed to download."
@@ -126,11 +126,20 @@ echo "Successfully downloaded Nocturnal UI version: $VERSION"
 echo ""
 
 echo "Mounting the disk image..."
-MOUNT_POINT=$(hdiutil attach "$DOWNLOAD_PATH" | grep -o "/Volumes/.*
-")
+HDIUTIL_OUTPUT=$(hdiutil attach "$DOWNLOAD_PATH")
+
+if [ $? -ne 0 ]; then
+    echo "DMG file failed to mount."
+    echo "$HDIUTIL_OUTPUT"
+    rm "$DOWNLOAD_PATH"
+    exit 1
+fi
+
+MOUNT_POINT=$(echo "$HDIUTIL_OUTPUT" | grep -o '/Volumes/.*' | head -n 1)
 
 if [ -z "$MOUNT_POINT" ]; then
-    echo "DMG file failed to mount."
+    echo "DMG mounted, but could not find the mount point."
+    hdiutil detach "$MOUNT_POINT" -force >/dev/null 2>&1
     rm "$DOWNLOAD_PATH"
     exit 1
 fi
@@ -165,10 +174,10 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Removing quarantine attribute..."
-xattr -d com.apple.quarantine "$DEST_APP_PATH"
+xattr -d com.apple.quarantine "$DEST_APP_PATH" 2>/dev/null || true
 
 echo "Cleaning up..."
-hdiutil detach "$MOUNT_POINT" -force
+hdiutil detach "$MOUNT_POINT" -force >/dev/null
 rm "$DOWNLOAD_PATH"
 
 echo "Installation complete! You can find $APP_NAME in your Applications folder."
