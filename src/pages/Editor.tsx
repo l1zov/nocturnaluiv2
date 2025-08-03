@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import AceEditor from 'react-ace';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../hooks/useThemeClasses';
+import { useThemeRawColors } from '../hooks/useThemeRawColors';
 import { invoke } from '@tauri-apps/api/core';
 
 import 'ace-builds/src-noconflict/mode-lua';
@@ -50,6 +51,7 @@ fetchSuggestions();
 export function Editor() {
   const { currentTheme } = useTheme();
   const theme = useThemeClasses();
+  const rawColors = useThemeRawColors();
   const [tabs, setTabs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<any>(null);
   const [showCloseButton, setShowCloseButton] = useState<number | null>(null);
@@ -88,6 +90,41 @@ export function Editor() {
       }
     `;
   }, []);
+
+  useEffect(() => {
+    const styleId = 'dynamic-suggestion-styles';
+    let styleElement = document.getElementById(styleId) as HTMLStyleElement | null;
+
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = styleId;
+      document.head.appendChild(styleElement);
+    }
+
+    styleElement.innerHTML = `
+      .ace_editor.ace_autocomplete {
+        background: ${rawColors.background.secondary} !important;
+        border: 1px solid ${rawColors.border.primary} !important;
+        color: ${rawColors.text.primary} !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        border-radius: 8px !important;
+        padding: 5px !important;
+      }
+      .ace_editor.ace_autocomplete .ace_completion-highlight {
+        color: ${rawColors.text.accent} !important;
+        text-shadow: none !important;
+      }
+      .ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line {
+        background: ${rawColors.background.tertiary} !important;
+        border-radius: 6px !important;
+      }
+      .ace_editor.ace_autocomplete .ace_marker-layer .ace_line-hover {
+        background: ${rawColors.background.tertiary} !important;
+        border: 1px solid ${rawColors.border.accent} !important;
+        border-radius: 6px !important;
+      }
+    `;
+  }, [rawColors]);
 
   useEffect(() => {
     const langTools = ace.require('ace/ext/language_tools');
