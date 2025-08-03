@@ -26,6 +26,7 @@ echo "All required dependencies are present."
 echo "Building the application..."
 
 echo "Building for Intel..."
+cargo clean
 npm run tauri -- build --target x86_64-apple-darwin
 
 if [ $? -ne 0 ]; then
@@ -34,6 +35,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Building for Silicon..."
+cargo clean
 npm run tauri -- build --target aarch64-apple-darwin
 
 if [ $? -ne 0 ]; then
