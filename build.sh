@@ -24,11 +24,21 @@ fi
 echo "All required dependencies are present."
 
 echo "Building the application..."
-npm run tauri build
 
-if [ $? -eq 0 ]; then
-  echo "Build successful!"
-else
-  echo "Build failed."
+echo "Building for Intel..."
+npm run tauri -- build --target x86_64-apple-darwin
+
+if [ $? -ne 0 ]; then
+  echo "Intel build failed."
   exit 1
 fi
+
+echo "Building for Silicon..."
+npm run tauri -- build --target aarch64-apple-darwin
+
+if [ $? -ne 0 ]; then
+  echo "Apple Silicon build failed."
+  exit 1
+fi
+
+echo "Built."

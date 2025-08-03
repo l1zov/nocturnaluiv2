@@ -25,7 +25,16 @@ echo "Required tools are present."
 echo "Getting the latest release..."
 
 LATEST_RELEASE_JSON=$(curl -s "https://api.github.com/repos/$REPO/releases/latest")
-DMG_URL=$(echo "$LATEST_RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith(".dmg")) | .browser_download_url')
+ARCH=$(uname -m)
+
+if [ "$ARCH" = "arm64" ]; then
+    DMG_URL=$(echo "$LATEST_RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith("aarch64.dmg")) | .browser_download_url')
+elif [ "$ARCH" = "x86_64" ]; then
+    DMG_URL=$(echo "$LATEST_RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith("x86_64.dmg")) | .browser_download_url')
+else
+    echo "Unsupported architecture: $ARCH"
+    exit 1
+fi
 VERSION=$(echo "$LATEST_RELEASE_JSON" | jq -r '.tag_name')
 
 if [ -z "$DMG_URL" ] || [ "$DMG_URL" == "null" ]; then
