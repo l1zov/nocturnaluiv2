@@ -161,10 +161,10 @@ echo "Installing $APP_NAME to /Applications..."
 
 if [ -d "$DEST_APP_PATH" ]; then
     echo "Removing existing version..."
-    rm -rf "$DEST_APP_PATH"
+    sudo rm -rf "$DEST_APP_PATH"
 fi
 
-cp -R "$SOURCE_APP_PATH" "/Applications/"
+sudo cp -R "$SOURCE_APP_PATH" "/Applications/"
 
 if [ $? -ne 0 ]; then
     echo "Failed to copy the application to the Applications folder."
@@ -174,7 +174,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Removing quarantine attribute..."
-xattr -d com.apple.quarantine "$DEST_APP_PATH" 2>/dev/null || true
+sudo xattr -d com.apple.quarantine "$DEST_APP_PATH" 2>/dev/null || true
 
 echo "Cleaning up..."
 hdiutil detach "$MOUNT_POINT" -force >/dev/null
