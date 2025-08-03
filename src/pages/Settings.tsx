@@ -12,15 +12,16 @@ export function Settings() {
   return (
     <div className={themeClasses.combine("p-4", themeClasses.text.primary)}>
       <h1 className="text-2xl font-bold mb-4">Settings</h1>
-      <div className="flex items-center justify-between">
-        <p>Theme</p>
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-base font-medium">Theme</p>
         <Menu as="div" className="relative inline-block text-left">
           <div>
             <Menu.Button className={themeClasses.combine(
-              "inline-flex w-full justify-center rounded-md px-4 py-2 text-sm font-medium",
+              "inline-flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium border min-w-[120px]",
               themeClasses.bg.secondary,
               themeClasses.text.primary,
               themeClasses.bg.hover,
+              themeClasses.border.primary,
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75'
             )}>
               {themeName}
@@ -40,7 +41,7 @@ export function Settings() {
             leaveTo="transform opacity-0 scale-95"
           >
             <Menu.Items className={themeClasses.combine(
-              "absolute right-0 mt-2 w-56 origin-top-right divide-y rounded-md shadow-lg ring-1 ring-black/5 focus:outline-none",
+              "absolute right-0 mt-2 w-40 origin-top-right rounded-lg shadow-lg border focus:outline-none z-10",
               themeClasses.bg.secondary,
               themeClasses.border.primary
             )}>
