@@ -22,7 +22,6 @@ if ! command -v cargo &> /dev/null; then
 fi
 
 echo "All required dependencies are present."
-cargo clean --manifest-path src-tauri/Cargo.toml
 
 echo "Building the application..."
 npm run tauri build

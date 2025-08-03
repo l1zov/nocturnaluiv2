@@ -1,11 +1,32 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Minus, Square } from 'lucide-react';
 import { useThemeClasses } from '../hooks/useThemeClasses';
+import { listen } from '@tauri-apps/api/event';
 
 export function Titlebar() {
   const [hovered, setHovered] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const theme = useThemeClasses();
+
+  useEffect(() => {
+    let unlistenFn: (() => void) | undefined;
+
+    const setupListener = async () => {
+      const unlisten = await listen<{ connected: boolean }>('connection-status-changed', (event) => {
+        setIsConnected(event.payload.connected);
+      });
+      unlistenFn = unlisten;
+    };
+
+    setupListener();
+
+    return () => {
+      if (unlistenFn) {
+        unlistenFn();
+      }
+    };
+  }, []);
 
   return (
     <div data-tauri-drag-region className={theme.combine(
@@ -15,7 +36,9 @@ export function Titlebar() {
       <div className="flex items-center">
         <span className={theme.combine("text-sm font-medium", theme.text.primary)}>Nocturnal UI</span>
         <span className={theme.combine("text-xs mx-2", theme.text.tertiary)}>|</span>
-        <span className={theme.combine("text-xs", theme.text.secondary)}>Not connected</span>
+        <span className={theme.combine("text-xs", theme.text.secondary)}>
+          {isConnected ? 'Connected' : 'Not connected'}
+        </span>
       </div>
       <div className="flex items-center space-x-2">
         <button

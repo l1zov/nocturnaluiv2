@@ -56,7 +56,7 @@ impl AppState {
 }
 
 fn save_state(state: &State<AppState>, app_handle: &AppHandle) -> Result<(), String> {
-    if let Ok(mut store) = StoreBuilder::new(app_handle, PathBuf::from(TAB_STORE_PATH)).build() {
+    if let Ok(store) = StoreBuilder::new(app_handle, PathBuf::from(TAB_STORE_PATH)).build() {
         let tabs = state.tabs.lock().unwrap();
         let active_tab_id = *state.active_tab_id.lock().unwrap();
 

@@ -7,6 +7,7 @@ fn greet(name: &str) -> String {
 mod tabs;
 
 use std::path::PathBuf;
+use tauri::Emitter;
 use tauri_plugin_store::StoreExt;
 
 const SETTINGS_PATH: &str = ".settings.dat";
@@ -46,23 +47,24 @@ async fn fetch_suggestions_command() -> Result<serde_json::Value, String> {
     Ok(suggestions)
 }
 
-use tauri::{Manager, State};
-use std::sync::Mutex;
+use tauri::Manager;
+use tokio::sync::Mutex;
+use tauri::async_runtime::spawn;
 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
-use reqwest::blocking::Client as BlockingClient;
+use reqwest::Client;
 use std::time::Duration;
 
 const HOST: &str = "127.0.0.1";
 
 struct ConnectionManager {
-    client: BlockingClient,
+    client: Client,
     port: Option<u16>,
 }
 
 impl ConnectionManager {
     fn new() -> Self {
         Self {
-            client: BlockingClient::builder()
+            client: Client::builder()
                 .timeout(Duration::from_secs(1))
                 .build()
                 .unwrap(),
@@ -70,11 +72,11 @@ impl ConnectionManager {
         }
     }
 
-    fn check_connection(&self, port: u16) -> bool {
+    async fn check_connection(&self, port: u16) -> bool {
         let url = format!("http://{}:{}/secret", HOST, port);
-        match self.client.get(&url).send() {
+        match self.client.get(&url).send().await {
             Ok(response) => {
-                if let Ok(text) = response.text() {
+                if let Ok(text) = response.text().await {
                     return text == "0xdeadbeef";
                 }
             }
@@ -83,9 +85,9 @@ impl ConnectionManager {
         false
     }
 
-    fn connect(&mut self) -> bool {
-                for port in 6969..=7069 {
-            if self.check_connection(port) {
+    async fn connect(&mut self) -> bool {
+        for port in 6969..=7069 {
+            if self.check_connection(port).await {
                 self.port = Some(port);
                 return true;
             }
@@ -93,58 +95,69 @@ impl ConnectionManager {
         false
     }
 
-        fn send(&mut self, script: &str) -> Result<bool, String> {
-                if self.port.is_none() && !self.connect() {
-            return Err("Connection failed: No service found on expected ports.".to_string());
-        }
+        async fn send(&mut self, script: &str) -> Result<bool, String> {
+            if self.port.is_none() && !self.connect().await {
+                return Err("Connection failed: No service found on expected ports.".to_string());
+            }
 
-        if let Some(port) = self.port {
-            let url = format!("http://{}:{}/execute", HOST, port);
-            match self
-                .client
-                .post(&url)
-                .header("Content-Type", "text/plain")
-                .body(script.to_string())
-                .send()
-            {
-                Ok(response) => {
-                    if response.status().is_success() {
-                        return Ok(true);
-                    } else {
-                        self.port = None; // reset port on failure
-                        return Err(format!("Execution failed with status: {}.", response.status()));
+            if let Some(port) = self.port {
+                let url = format!("http://{}:{}/execute", HOST, port);
+                match self
+                    .client
+                    .post(&url)
+                    .header("Content-Type", "text/plain")
+                    .body(script.to_string())
+                    .send()
+                    .await
+                {
+                    Ok(response) => {
+                        if response.status().is_success() {
+                            return Ok(true);
+                        } else {
+                            self.port = None; // reset port on failure
+                            return Err(format!(
+                                "Execution failed with status: {}.",
+                                response.status()
+                            ));
+                        }
+                    }
+                    Err(e) => {
+                        self.port = None; // reset port on error
+                        return Err(format!("Request failed: {}", e));
                     }
                 }
-                Err(e) => {
-                    self.port = None; // reset port on error
-                    return Err(format!("Request failed: {}", e));
-                }
             }
+            Ok(false)
         }
-        Ok(false)
-    }
 }
 
 #[tauri::command]
-fn execute_script_command(
+async fn execute_script_command(
     script: String,
-    state: State<Mutex<ConnectionManager>>,
+    state: tauri::State<'_, tokio::sync::Mutex<ConnectionManager>>,
 ) -> Result<(), String> {
-    let mut manager = state.lock().unwrap();
-    match manager.send(&script) {
+    let mut manager = state.lock().await;
+    match manager.send(&script).await {
         Ok(true) => Ok(()),
-        Ok(false) => Err("An unknown error occurred.".to_string()),
+        Ok(false) => Err("uhoh! unknown error.".to_string()),
         Err(e) => Err(e),
     }
 }
 
+#[derive(Clone, serde::Serialize)]
+struct ConnectionStatusPayload {
+    connected: bool,
+}
+
 #[tauri::command]
-fn check_connection_command(state: State<Mutex<ConnectionManager>>) -> bool {
-    let mut manager = state.lock().unwrap();
-    if manager.port.is_some() {
-        return manager.check_connection(manager.port.unwrap());
+async fn check_connection_command(
+    state: tauri::State<'_, tokio::sync::Mutex<ConnectionManager>>,
+) -> Result<bool, String> {
+    let mut manager = state.lock().await;
+    if let Some(port) = manager.port {
+        return Ok(manager.check_connection(port).await);
     }
-    manager.connect()
+    Ok(manager.connect().await)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -164,6 +177,35 @@ pub fn run() {
             #[cfg(target_os = "macos")]
             apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(16.0))
                 .expect("failed to apply vibrancy");
+
+            let app_handle = app.handle().clone();
+
+            spawn(async move {
+                let connection_manager_state = app_handle.state::<tokio::sync::Mutex<ConnectionManager>>();
+                loop {
+                    let is_connected = {
+                        let mut manager = connection_manager_state.lock().await;
+                        let connected = match manager.port {
+                            Some(port) => manager.check_connection(port).await,
+                            None => manager.connect().await,
+                        };
+                        if !connected {
+                            manager.port = None;
+                        }
+                        connected
+                    };
+
+                    app_handle
+                        .emit_to(
+                            "main",
+                            "connection-status-changed",
+                            ConnectionStatusPayload { connected: is_connected },
+                        )
+                        .unwrap();
+
+                    tokio::time::sleep(Duration::from_secs(2)).await;
+                }
+            });
 
             Ok(())
         })
