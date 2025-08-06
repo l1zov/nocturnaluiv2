@@ -56,37 +56,52 @@ use std::time::Duration;
 
 const HOST: &str = "127.0.0.1";
 
+struct ConnectionDetails {
+    host: String,
+    port_range: std::ops::RangeInclusive<u16>,
+}
+
+impl Default for ConnectionDetails {
+    fn default() -> Self {
+        Self {
+            host: HOST.to_string(),
+            port_range: 6969..=7069,
+        }
+    }
+}
+
 struct ConnectionManager {
     client: Client,
     port: Option<u16>,
+    details: ConnectionDetails,
 }
 
 impl ConnectionManager {
-    fn new() -> Self {
-        Self {
-            client: Client::builder()
-                .timeout(Duration::from_secs(1))
-                .build()
-                .unwrap(),
+    fn new(details: ConnectionDetails) -> Result<Self, String> {
+        let client = Client::builder()
+            .timeout(Duration::from_secs(1))
+            .build()
+            .map_err(|e| e.to_string())?;
+        Ok(Self {
+            client,
             port: None,
-        }
+            details,
+        })
     }
 
     async fn check_connection(&self, port: u16) -> bool {
-        let url = format!("http://{}:{}/secret", HOST, port);
+        let url = format!("http://{}:{}/secret", self.details.host, port);
         match self.client.get(&url).send().await {
-            Ok(response) => {
-                if let Ok(text) = response.text().await {
-                    return text == "0xdeadbeef";
-                }
-            }
-            Err(_) => {}
+            Ok(response) => match response.text().await {
+                Ok(text) => text == "0xdeadbeef",
+                Err(_) => false,
+            },
+            Err(_) => false,
         }
-        false
     }
 
     async fn connect(&mut self) -> bool {
-        for port in 6969..=7069 {
+        for port in self.details.port_range.clone() {
             if self.check_connection(port).await {
                 self.port = Some(port);
                 return true;
@@ -95,40 +110,40 @@ impl ConnectionManager {
         false
     }
 
-        async fn send(&mut self, script: &str) -> Result<bool, String> {
-            if self.port.is_none() && !self.connect().await {
-                return Err("Connection failed: No service found on expected ports.".to_string());
+    async fn send(&mut self, script: &str) -> Result<bool, String> {
+        for attempt in 0..2 {
+            if self.port.is_none() {
+                if !self.connect().await {
+                    if attempt == 0 {
+                        // just fail immediately on the first attempt if connection is impossible
+                        return Err("hydrogen isnt available".to_string());
+                    } else {
+                        // break the loop to return the final error
+                        break;
+                    }
+                }
             }
 
             if let Some(port) = self.port {
-                let url = format!("http://{}:{}/execute", HOST, port);
-                match self
-                    .client
-                    .post(&url)
-                    .header("Content-Type", "text/plain")
-                    .body(script.to_string())
-                    .send()
-                    .await
-                {
+                let url = format!("http://{}:{}/execute", self.details.host, port);
+                match self.client.post(&url).header("Content-Type", "text/plain").body(script.to_string()).send().await {
                     Ok(response) => {
                         if response.status().is_success() {
                             return Ok(true);
                         } else {
-                            self.port = None; // reset port on failure
-                            return Err(format!(
-                                "Execution failed with status: {}.",
-                                response.status()
-                            ));
+                            self.port = None; 
                         }
                     }
-                    Err(e) => {
-                        self.port = None; // reset port on error
-                        return Err(format!("Request failed: {}", e));
+                    Err(_) => {
+                        self.port = None;
                     }
                 }
+            } else if attempt == 0 {
+                return Err("connection reported success but no port was set".to_string());
             }
-            Ok(false)
         }
+        Err("script failed to send".to_string())
+    }
 }
 
 #[tauri::command]
@@ -162,11 +177,14 @@ async fn check_connection_command(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let connection_manager = ConnectionManager::new(ConnectionDetails::default())
+        .expect("failed to create connection manager");
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
-        .manage(Mutex::new(ConnectionManager::new()))
+        .manage(Mutex::new(connection_manager))
         .setup(|app| {
             app.manage(tabs::AppState::new(&app.handle()));
             let window = app.get_webview_window("main").unwrap();
@@ -185,14 +203,14 @@ pub fn run() {
                 loop {
                     let is_connected = {
                         let mut manager = connection_manager_state.lock().await;
-                        let connected = match manager.port {
-                            Some(port) => manager.check_connection(port).await,
-                            None => manager.connect().await,
-                        };
-                        if !connected {
-                            manager.port = None;
+                        if manager.port.is_none() {
+                            manager.connect().await;
+                        } else if let Some(port) = manager.port {
+                            if !manager.check_connection(port).await {
+                                manager.port = None;
+                            }
                         }
-                        connected
+                        manager.port.is_some()
                     };
 
                     app_handle
