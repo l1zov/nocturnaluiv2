@@ -14,17 +14,29 @@ pub struct Tab {
     pub content: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize)]
 struct SerializableState {
     tabs: Vec<Tab>,
     active_tab_id: usize,
+    next_tab_id: usize,
 }
 
-#[derive(Default)]
-pub struct AppState {
-    pub tabs: Mutex<Vec<Tab>>,
-    pub active_tab_id: Mutex<usize>,
+impl Default for SerializableState {
+    fn default() -> Self {
+        let initial_tab = Tab {
+            id: 1,
+            title: "Script 1".to_string(),
+            content: "".to_string(),
+        };
+        Self {
+            tabs: vec![initial_tab],
+            active_tab_id: 1,
+            next_tab_id: 2,
+        }
+    }
 }
+
+pub struct AppState(Mutex<SerializableState>);
 
 impl AppState {
     pub fn new(app_handle: &AppHandle) -> Self {
@@ -33,68 +45,49 @@ impl AppState {
                 if let Some(saved_state) = store.get(TAB_STATE_KEY) {
                     if let Ok(state) = serde_json::from_value::<SerializableState>(saved_state.clone()) {
                         if !state.tabs.is_empty() {
-                            return Self {
-                                tabs: Mutex::new(state.tabs),
-                                active_tab_id: Mutex::new(state.active_tab_id),
-                            };
+                            return Self(Mutex::new(state));
                         }
                     }
                 }
             }
         }
 
-        let initial_tab = Tab {
-            id: 1,
-            title: "Script 1".to_string(),
-            content: "".to_string(),
-        };
-        Self {
-            tabs: Mutex::new(vec![initial_tab]),
-            active_tab_id: Mutex::new(1),
-        }
+        Self(Mutex::new(SerializableState::default()))
     }
 }
 
 fn save_state(state: &State<AppState>, app_handle: &AppHandle) -> Result<(), String> {
-    if let Ok(store) = StoreBuilder::new(app_handle, PathBuf::from(TAB_STORE_PATH)).build() {
-        let tabs = state.tabs.lock().unwrap();
-        let active_tab_id = *state.active_tab_id.lock().unwrap();
+    let store = StoreBuilder::new(app_handle, PathBuf::from(TAB_STORE_PATH))
+        .build()
+        .map_err(|e| e.to_string())?;
+    let state_guard = state.0.lock().map_err(|e| e.to_string())?;
 
-        let serializable_state = SerializableState {
-            tabs: tabs.clone(),
-            active_tab_id,
-        };
-
-        let json_state = serde_json::to_value(&serializable_state).map_err(|e| e.to_string())?;
-        store.set(TAB_STATE_KEY.to_string(), json_state);
-        store.save().map_err(|e| e.to_string())?;
-    }
-    Ok(())
+    let json_state = serde_json::to_value(&*state_guard).map_err(|e| e.to_string())?;
+    store.set(TAB_STATE_KEY.to_string(), json_state);
+    store.save().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn get_tabs(state: State<AppState>) -> Result<Vec<Tab>, String> {
-    Ok(state.tabs.lock().unwrap().clone())
+    let state_guard = state.0.lock().map_err(|e| e.to_string())?;
+    Ok(state_guard.tabs.clone())
 }
 
 #[tauri::command]
 pub fn get_active_tab(state: State<AppState>) -> Result<Tab, String> {
-    let active_id = *state.active_tab_id.lock().unwrap();
-    let tabs = state.tabs.lock().unwrap();
-    if let Some(tab) = tabs.iter().find(|t| t.id == active_id) {
-        Ok(tab.clone())
-    } else if let Some(first_tab) = tabs.first() {
-        *state.active_tab_id.lock().unwrap() = first_tab.id;
-        Ok(first_tab.clone())
-    } else {
-        Err("No tabs available".to_string())
-    }
+    let state_guard = state.0.lock().map_err(|e| e.to_string())?;
+    state_guard
+        .tabs
+        .iter()
+        .find(|t| t.id == state_guard.active_tab_id)
+        .cloned()
+        .ok_or_else(|| "active tab not found".to_string())
 }
 
 #[tauri::command]
 pub fn add_tab(state: State<'_, AppState>, app_handle: AppHandle) -> Result<Tab, String> {
-    let mut tabs = state.tabs.lock().unwrap();
-    let new_id = tabs.iter().map(|t| t.id).max().unwrap_or(0) + 1;
+    let mut state_guard = state.0.lock().map_err(|e| e.to_string())?;
+    let new_id = state_guard.next_tab_id;
 
     let new_tab = Tab {
         id: new_id,
@@ -102,10 +95,11 @@ pub fn add_tab(state: State<'_, AppState>, app_handle: AppHandle) -> Result<Tab,
         content: "".to_string(),
     };
 
-    tabs.push(new_tab.clone());
-    *state.active_tab_id.lock().unwrap() = new_id;
+    state_guard.tabs.push(new_tab.clone());
+    state_guard.active_tab_id = new_id;
+    state_guard.next_tab_id += 1;
 
-    drop(tabs); // Unlock before calling save_state
+    drop(state_guard);
     save_state(&state, &app_handle)?;
 
     Ok(new_tab)
@@ -117,21 +111,24 @@ pub fn close_tab(
     id: usize,
     app_handle: AppHandle,
 ) -> Result<Vec<Tab>, String> {
-    let mut tabs = state.tabs.lock().unwrap();
-    if tabs.len() <= 1 {
+    let mut state_guard = state.0.lock().map_err(|e| e.to_string())?;
+    if state_guard.tabs.len() <= 1 {
         return Err("Cannot close the last tab.".to_string());
     }
 
-    let mut active_tab_id = state.active_tab_id.lock().unwrap();
-    if let Some(index) = tabs.iter().position(|t| t.id == id) {
-        tabs.remove(index);
-        if *active_tab_id == id {
-            *active_tab_id = tabs.last().map_or(0, |t| t.id);
+    if let Some(index) = state_guard.tabs.iter().position(|t| t.id == id) {
+        state_guard.tabs.remove(index);
+        if state_guard.active_tab_id == id {
+            state_guard.active_tab_id = if index < state_guard.tabs.len() {
+                state_guard.tabs[index].id
+            } else {
+                state_guard.tabs.last().map_or(0, |t| t.id)
+            };
         }
     }
-    let cloned_tabs = tabs.clone();
-    drop(tabs);
-    drop(active_tab_id);
+
+    let cloned_tabs = state_guard.tabs.clone();
+    drop(state_guard);
     save_state(&state, &app_handle)?;
 
     Ok(cloned_tabs)
@@ -143,10 +140,10 @@ pub fn set_active_tab(
     id: usize,
     app_handle: AppHandle,
 ) -> Result<(), String> {
-    let tabs = state.tabs.lock().unwrap();
-    if tabs.iter().any(|t| t.id == id) {
-        *state.active_tab_id.lock().unwrap() = id;
-        drop(tabs);
+    let mut state_guard = state.0.lock().map_err(|e| e.to_string())?;
+    if state_guard.tabs.iter().any(|t| t.id == id) {
+        state_guard.active_tab_id = id;
+        drop(state_guard);
         save_state(&state, &app_handle)?;
         Ok(())
     } else {
@@ -161,10 +158,10 @@ pub fn update_tab_content(
     content: String,
     app_handle: AppHandle,
 ) -> Result<(), String> {
-    let mut tabs = state.tabs.lock().unwrap();
-    if let Some(tab) = tabs.iter_mut().find(|t| t.id == id) {
+    let mut state_guard = state.0.lock().map_err(|e| e.to_string())?;
+    if let Some(tab) = state_guard.tabs.iter_mut().find(|t| t.id == id) {
         tab.content = content;
-        drop(tabs);
+        drop(state_guard);
         save_state(&state, &app_handle)?;
         Ok(())
     } else {
