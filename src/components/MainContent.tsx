@@ -5,6 +5,7 @@ export function MainContent() {
   
   const updates = [
     { version: 'dev 1', description: 'v2 first dev version' },
+    { version: 'dev 2', description: "Added Tabs Renaming. Fixes."}
   ];
 
   return (
