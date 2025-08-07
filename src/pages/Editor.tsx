@@ -271,6 +271,12 @@ export function Editor() {
     setRenamingTab(null);
   };
 
+  const handleClear = () => {
+    if (activeTab) {
+      handleEditorChange('');
+    }
+  };
+
   const handleExecute = async () => {
     if (!isConnected || !activeTab) return;
     try {
@@ -389,10 +395,27 @@ export function Editor() {
 
       <div
         className={theme.combine(
-          "flex items-center justify-end p-2 border-t",
+          "flex items-center justify-between p-2 border-t",
           theme.border.primary
         )}
       >
+        <button
+          onClick={handleClear}
+          style={{
+            backgroundColor: currentTheme.colors.background.tertiary,
+            color: currentTheme.colors.text.secondary,
+            padding: '4px 12px',
+            borderRadius: '4px',
+            fontSize: '16px',
+            fontWeight: 500,
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s ease',
+            marginRight: '8px'
+          }}
+        >
+          Clear
+        </button>
         <button
           onClick={handleExecute}
           onMouseDown={() => setIsPressed(true)}
