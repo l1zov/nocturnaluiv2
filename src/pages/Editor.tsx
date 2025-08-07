@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import AceEditor from 'react-ace';
 import { useTheme } from '../context/ThemeContext';
@@ -59,8 +59,7 @@ export function Editor() {
     const [isPressed, setIsPressed] = useState(false);
   const [closingTabId, setClosingTabId] = useState<number | null>(null);
   const [renamingTab, setRenamingTab] = useState<{ id: number; title: string; initialWidth: number } | null>(null);
-
-  let hoverTimeout: number;
+  const hoverTimeout = useRef<number | null>(null);
 
   useEffect(() => {
     const styleId = 'dynamic-scrollbar-styles';
@@ -199,7 +198,9 @@ export function Editor() {
   };
 
   const handleTabClick = async (id: number) => {
-    clearTimeout(hoverTimeout);
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
     setShowCloseButton(null);
     try {
       await invoke('set_active_tab', { id });
@@ -213,14 +214,15 @@ export function Editor() {
   };
 
   const handleTabMouseEnter = (id: number) => {
-    clearTimeout(hoverTimeout);
-    hoverTimeout = setTimeout(() => {
+    hoverTimeout.current = window.setTimeout(() => {
       setShowCloseButton(id);
-    }, 1000);
+    }, 500);
   };
 
   const handleTabMouseLeave = () => {
-    clearTimeout(hoverTimeout);
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
     setShowCloseButton(null);
   };
 
@@ -302,10 +304,10 @@ export function Editor() {
                 isActive ? theme.text.primary : theme.text.secondary,
                 isActive ? "font-medium" : "font-normal",
                 `border-b ${theme.border.primary}`,
-                showCloseButton === tab.id && !isRenaming ? "pr-8" : "",
-                closingTabId === tab.id ? 'tab-closing' : ''
+                closingTabId === tab.id ? 'tab-closing' : '',
+                showCloseButton === tab.id && !isRenaming ? 'px-3 pr-8' : 'px-3'
               )}
-              style={{ marginBottom: '-1px', paddingLeft: '12px', paddingRight: '12px' }}
+              style={{ marginBottom: '-1px' }}
             >
               {isRenaming && renamingTab ? (
                 <input
