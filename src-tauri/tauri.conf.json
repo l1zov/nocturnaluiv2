@@ -16,7 +16,8 @@
       {
         "transparent": true,
         "titleBarStyle": "Transparent",
-        "decorations": false
+        "decorations": false,
+        "visible": false
       }
     ],
 
@@ -44,6 +45,7 @@
       ]
     }
   },
+  "plugins": {},
   "bundle": {
     "active": true,
     "targets": [

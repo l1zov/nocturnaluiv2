@@ -30,7 +30,7 @@ export function Titlebar() {
 
   return (
     <div data-tauri-drag-region className={theme.combine(
-      "h-10 flex justify-between items-center px-4 border-b",
+      "h-10 flex justify-between items-center px-4 border-b select-none",
       theme.border.primary
     )}>
       <div className="flex items-center">

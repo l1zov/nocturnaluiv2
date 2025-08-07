@@ -1,8 +1,4 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
 
 mod tabs;
 
@@ -11,6 +7,17 @@ use tauri::Emitter;
 use tauri_plugin_store::StoreExt;
 
 const SETTINGS_PATH: &str = ".settings.dat";
+
+#[tauri::command]
+fn check_hydrogen_installation() -> bool {
+    let roblox_player_copy_path = std::path::Path::new("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer.copy");
+    roblox_player_copy_path.exists()
+}
+
+#[tauri::command]
+fn greet(name: &str) -> String {
+    format!("Hello, {}! You've been greeted from Rust!", name)
+}
 
 #[tauri::command]
 fn save_settings(app: tauri::AppHandle, key: String, value: String) -> Result<(), String> {
@@ -183,18 +190,34 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_dialog::init())
+
         .manage(Mutex::new(connection_manager))
         .setup(|app| {
+            if !check_hydrogen_installation() {
+                let output = std::process::Command::new("osascript")
+                    .arg("-e")
+                    .arg("display dialog \"Hydrogen could not be found. Please make sure it is installed correctly.\" with title \"Nocturnal UI\" buttons {\"Quit\", \"Dismiss\"} default button \"Dismiss\" with icon caution")
+                    .output()
+                    .expect("osascript failed");
+
+                let stdout = String::from_utf8_lossy(&output.stdout);
+
+                if !stdout.contains("button returned:Dismiss") {
+                    let handle = app.handle().clone();
+                    handle.exit(1);
+                    return Ok(());
+                }
+            }
+
             app.manage(tabs::AppState::new(&app.handle()));
             let window = app.get_webview_window("main").unwrap();
 
             #[cfg(debug_assertions)]
             window.open_devtools();
 
-            #[cfg(target_os = "macos")]
-            apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(16.0))
-                .expect("failed to apply vibrancy");
+                #[cfg(target_os = "macos")]
+                apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(16.0))
+                    .expect("failed to apply vibrancy");
 
             let app_handle = app.handle().clone();
 
@@ -224,7 +247,7 @@ pub fn run() {
                     tokio::time::sleep(Duration::from_secs(2)).await;
                 }
             });
-
+            window.show().unwrap();
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -234,6 +257,7 @@ pub fn run() {
             fetch_suggestions_command,
             execute_script_command,
             check_connection_command,
+            check_hydrogen_installation,
             tabs::get_tabs,
             tabs::get_active_tab,
             tabs::add_tab,

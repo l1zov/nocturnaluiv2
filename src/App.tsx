@@ -1,25 +1,29 @@
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Titlebar } from './components/Titlebar';
+
 import { Sidebar } from './components/Sidebar';
 import { MainContent } from './components/MainContent';
+import { Titlebar } from './components/Titlebar';
 import { useTheme, ThemeProvider } from './context/ThemeContext';
 import { useThemeClasses } from './hooks/useThemeClasses';
 import VideoBackground from './components/VideoBackground';
 import { Settings } from './pages/Settings';
 import { Editor } from './pages/Editor';
 
+
 function App() {
   return (
     <ThemeProvider defaultTheme="dracula">
       <Router>
-        <Layout />
+        <Routes>
+          <Route path="/*" element={<MainLayout />} />
+        </Routes>
       </Router>
     </ThemeProvider>
   );
 }
 
-function Layout() {
+function MainLayout() {
   const themeClasses = useThemeClasses();
   const { currentTheme } = useTheme();
 
@@ -37,7 +41,7 @@ function Layout() {
           <Sidebar />
           <Routes>
             <Route path="/" element={<MainContent />} />
-                        <Route path="/settings" element={<Settings />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/editor" element={<Editor />} />
           </Routes>
         </div>
