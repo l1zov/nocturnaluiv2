@@ -239,6 +239,7 @@ pub fn run() {
             tabs::add_tab,
             tabs::close_tab,
             tabs::set_active_tab,
+            tabs::rename_tab,
             tabs::update_tab_content
         ])
         .run(tauri::generate_context!())

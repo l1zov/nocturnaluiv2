@@ -152,6 +152,28 @@ pub fn set_active_tab(
 }
 
 #[tauri::command]
+pub fn rename_tab(
+    state: State<'_, AppState>,
+    id: usize,
+    new_title: String,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    if new_title.chars().count() > 24 {
+        return Err("Tab title cannot exceed 24 characters.".to_string());
+    }
+
+    let mut state_guard = state.0.lock().map_err(|e| e.to_string())?;
+    if let Some(tab) = state_guard.tabs.iter_mut().find(|t| t.id == id) {
+        tab.title = new_title;
+        drop(state_guard);
+        save_state(&state, &app_handle)?;
+        Ok(())
+    } else {
+        Err("Tab not found.".to_string())
+    }
+}
+
+#[tauri::command]
 pub fn update_tab_content(
     state: State<'_, AppState>,
     id: usize,

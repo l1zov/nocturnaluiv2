@@ -58,6 +58,7 @@ export function Editor() {
   const [isConnected, setIsConnected] = useState(false);
     const [isPressed, setIsPressed] = useState(false);
   const [closingTabId, setClosingTabId] = useState<number | null>(null);
+  const [renamingTab, setRenamingTab] = useState<{ id: number; title: string; initialWidth: number } | null>(null);
 
   let hoverTimeout: number;
 
@@ -243,6 +244,31 @@ export function Editor() {
     }, 300);
   };
 
+  const handleRenameTab = async () => {
+    if (!renamingTab) return;
+
+    const { id, title } = renamingTab;
+
+    if (title.trim() === '') {
+      setRenamingTab(null);
+      return;
+    }
+
+    const tabToRename = tabs.find(t => t.id === id);
+    if (tabToRename && tabToRename.title !== title) {
+      try {
+        await invoke('rename_tab', { id, newTitle: title });
+        const updatedTabs = tabs.map(t =>
+          t.id === id ? { ...t, title: title } : t
+        );
+        setTabs(updatedTabs);
+      } catch (error) {
+        console.error("rename tab error:", error);
+      }
+    }
+    setRenamingTab(null);
+  };
+
   const handleExecute = async () => {
     if (!isConnected || !activeTab) return;
     try {
@@ -257,10 +283,17 @@ export function Editor() {
                   <div className={theme.combine("flex items-center border-b", theme.border.primary)}>
         {tabs.map(tab => {
           const isActive = activeTab?.id === tab.id;
+          const isRenaming = renamingTab?.id === tab.id;
+
           return (
-                                    <div
+            <div
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
+              onDoubleClick={(e) => {
+                const titleElement = e.currentTarget.querySelector('span');
+                const initialWidth = titleElement ? titleElement.offsetWidth : 60;
+                setRenamingTab({ id: tab.id, title: tab.title, initialWidth });
+              }}
               onMouseEnter={() => handleTabMouseEnter(tab.id)}
               onMouseLeave={handleTabMouseLeave}
               className={theme.combine(
@@ -269,22 +302,52 @@ export function Editor() {
                 isActive ? theme.text.primary : theme.text.secondary,
                 isActive ? "font-medium" : "font-normal",
                 `border-b ${theme.border.primary}`,
-                                showCloseButton === tab.id ? "px-3 pr-8" : "px-3",
+                showCloseButton === tab.id && !isRenaming ? "pr-8" : "",
                 closingTabId === tab.id ? 'tab-closing' : ''
               )}
-              style={{ marginBottom: '-1px' }}
+              style={{ marginBottom: '-1px', paddingLeft: '12px', paddingRight: '12px' }}
             >
-              <span>{tab.title}</span>
-              <button
-                onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }}
-                className={theme.combine(
-                  "absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity duration-300 ease-in-out",
-                                    showCloseButton === tab.id ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
-                  theme.bg.hover
-                )}
-              >
-                <X size={14} className={theme.text.muted} />
-              </button>
+              {isRenaming && renamingTab ? (
+                <input
+                  type="text"
+                  value={renamingTab.title}
+                  autoComplete="off"
+                  onChange={(e) => {
+                    if (e.target.value.length <= 24) {
+                      setRenamingTab({ ...renamingTab, title: e.target.value });
+                    }
+                  }}
+                  onBlur={handleRenameTab}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleRenameTab();
+                    } else if (e.key === 'Escape') {
+                      setRenamingTab(null);
+                    }
+                  }}
+                  autoFocus
+                  className="bg-transparent border-none outline-none text-sm h-full p-0 m-0"
+                  style={{
+                    color: isActive ? rawColors.text.primary : rawColors.text.secondary,
+                    width: `calc(${renamingTab.initialWidth}px + 2ch)`,
+                    minWidth: `${renamingTab.initialWidth}px`
+                  }}
+                />
+              ) : (
+                <span>{tab.title}</span>
+              )}
+              {!isRenaming && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }}
+                  className={theme.combine(
+                    "absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity duration-300 ease-in-out",
+                    showCloseButton === tab.id ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+                    theme.bg.hover
+                  )}
+                >
+                  <X size={14} className={theme.text.muted} />
+                </button>
+              )}
             </div>
           );
         })}
