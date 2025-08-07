@@ -188,7 +188,6 @@ pub fn run() {
         .expect("failed to create connection manager");
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
 
         .manage(Mutex::new(connection_manager))

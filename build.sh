@@ -1,46 +1,37 @@
 #!/bin/bash
+set -e
 echo "Checking for required dependencies..."
 
-if ! command -v node &> /dev/null; then
-    echo "Node.js is not installed. Please install it to continue."
-    exit 1
-fi
+command_exists() {
+    command -v "$1" &> /dev/null
+}
 
-if ! command -v npm &> /dev/null; then
-    echo "Npm is not installed. Please install it to continue."
-    exit 1
-fi
-
-if ! command -v rustc &> /dev/null; then
-    echo "Rust is not installed. Please install it to continue."
-    exit 1
-fi
-
-if ! command -v cargo &> /dev/null; then
-    echo "Cargo is not installed. Please install it to continue."
-    exit 1
-fi
+for cmd in node npm rustc cargo; do
+    if ! command_exists $cmd; then
+        echo "$cmd is not installed. Please install it to continue."
+        exit 1
+    fi
+done
 
 echo "All required dependencies are present."
 
-echo "Building the application..."
+echo "Checking and installing required Rust targets for universal build..."
+rustup target add aarch64-apple-darwin
+rustup target add x86_64-apple-darwin
+echo "Required Rust targets are configured."
 
-echo "Building for Intel..."
-cargo clean
-npm run tauri -- build --target x86_64-apple-darwin
+echo "Installing frontend dependencies..."
+npm install
+echo "Frontend dependencies are up to date."
+echo "Building the universal application..."
+(cd src-tauri && cargo clean)
+npm run tauri -- build --target universal-apple-darwin
 
 if [ $? -ne 0 ]; then
-  echo "Intel build failed."
+  echo "Universal build failed."
   exit 1
 fi
 
-echo "Building for Silicon..."
-cargo clean
-npm run tauri -- build --target aarch64-apple-darwin
+echo
+echo "Build complete."
 
-if [ $? -ne 0 ]; then
-  echo "Apple Silicon build failed."
-  exit 1
-fi
-
-echo "Built."

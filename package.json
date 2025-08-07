@@ -13,7 +13,6 @@
     "@headlessui/react": "^2.2.6",
     "@tailwindcss/vite": "^4.1.11",
     "@tauri-apps/api": "^2.7.0",
-    "@tauri-apps/plugin-opener": "^2.4.0",
     "ace-builds": "^1.43.2",
     "lucide-react": "^0.526.0",
     "react": "^19.1.0",
