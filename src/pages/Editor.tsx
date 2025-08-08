@@ -385,6 +385,7 @@ export function Editor() {
           name="nocturnal_ace_editor"
           height="100%"
           width="100%"
+          showPrintMargin={false}
           editorProps={{ $blockScrolling: true }}
           setOptions={{
             fontFamily: 'Fira Code',
@@ -393,6 +394,7 @@ export function Editor() {
             enableLiveAutocompletion: true,
             highlightActiveLine: false,
             wrap: true,
+            showPrintMargin: false,
           }}
         />
       </div>
