@@ -265,7 +265,7 @@ export const twilightTheme: Theme = {
       accent: 'text-[#CDA869]',
     },
     border: {
-      primary: 'border-[#232323]',
+      primary: 'border-[#363636]',
       secondary: 'border-[#5F5A60]',
       accent: 'border-[#CDA869]',
     },
@@ -287,6 +287,129 @@ export const twilightTheme: Theme = {
   },
 };
 
+export const ayuTheme: Theme = {
+  name: 'ayu',
+  editorTheme: 'ace/theme/ayu-light',
+  colors: {
+    background: {
+      primary: 'bg-[#FAFAFA]',
+      secondary: 'bg-[#F2F2F2]',
+      tertiary: 'bg-[#B3B8BD]',
+      hover: 'hover:bg-[#B3B8BD]/50',
+      active: 'bg-[#B3B8BD]/50',
+    },
+    text: {
+      primary: 'text-[#6C7680]',
+      secondary: 'text-[#6C7680]/75',
+      tertiary: 'text-[#6C7680]/50',
+      muted: 'text-[#828c99]',
+      accent: 'text-[#FA8D3E]',
+    },
+    border: {
+      primary: 'border-[#e8e8e8]',
+      secondary: 'border-[#B3B8BD]',
+      accent: 'border-[#FA8D3E]',
+    },
+    accent: {
+      primary: 'bg-[#FA8D3E]',
+      secondary: 'bg-[#ED9366]',
+      success: 'bg-[#86B300]',
+      warning: 'bg-[#F2AE49]',
+      error: 'bg-[#F07171]',
+    },
+    focus: {
+      ring: 'focus:ring-[#FF9940]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
+export const nordTheme: Theme = {
+  name: 'nord',
+  editorTheme: 'nord_dark',
+  colors: {
+    background: {
+      primary: 'bg-[#2e3440]',
+      secondary: 'bg-[#434c5e]',
+      tertiary: 'bg-[#4c566a]',
+      hover: 'hover:bg-[#4c566a]/50',
+      active: 'bg-[#4c566a]/50',
+    },
+    text: {
+      primary: 'text-[#d8dee9]',
+      secondary: 'text-[#d8dee9]/75',
+      tertiary: 'text-[#d8dee9]/50',
+      muted: 'text-[#88C0D0]',
+      accent: 'text-[#81a1c1]',
+    },
+    border: {
+      primary: 'border-[#4c566a]',
+      secondary: 'border-[#4c566a]',
+      accent: 'border-[#81a1c1]',
+    },
+    accent: {
+      primary: 'bg-[#81a1c1]',
+      secondary: 'bg-[#8fbcbb]',
+      success: 'bg-[#a3be8c]',
+      warning: 'bg-[#ebcb8b]',
+      error: 'bg-[#bf616a]',
+    },
+    focus: {
+      ring: 'focus:ring-[#81a1c1]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
+export const gruvboxTheme: Theme = {
+  name: 'gruvbox',
+  editorTheme: 'gruvbox',
+  colors: {
+    background: {
+      primary: 'bg-[#1D2021]',
+      secondary: 'bg-[#3C3836]',
+      tertiary: 'bg-[#504945]',
+      hover: 'hover:bg-[#665c54]/50',
+      active: 'bg-[#665c54]/50',
+    },
+    text: {
+      primary: 'text-[#EBDAB4]',
+      secondary: 'text-[#EBDAB4]/75',
+      tertiary: 'text-[#EBDAB4]/50',
+      muted: 'text-[#a89984]',
+      accent: 'text-[#F9BC41]',
+    },
+    border: {
+      primary: 'border-[#504945]',
+      secondary: 'border-[#504945]',
+      accent: 'border-[#F9BC41]',
+    },
+    accent: {
+      primary: 'bg-[#F9BC41]',
+      secondary: 'bg-[#8ec07c]',
+      success: 'bg-[#B8BA37]',
+      warning: 'bg-[#F9BC41]',
+      error: 'bg-[#F84B3C]',
+    },
+    focus: {
+      ring: 'focus:ring-[#F9BC41]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
 export const themes = {
   dracula: draculaTheme,
   'tomorrow-night': tomorrowNightTheme,
@@ -295,4 +418,7 @@ export const themes = {
   cobalt: cobaltTheme,
   terminal: terminalTheme,
   twilight: twilightTheme,
+  ayu: ayuTheme,
+  nord: nordTheme,
+  gruvbox: gruvboxTheme,
 } as const;

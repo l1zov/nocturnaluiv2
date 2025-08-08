@@ -13,6 +13,10 @@ import 'ace-builds/src-noconflict/theme-dracula';
 import 'ace-builds/src-noconflict/theme-cobalt';
 import 'ace-builds/src-noconflict/theme-terminal';
 import 'ace-builds/src-noconflict/theme-twilight';
+import 'ace-builds/src-noconflict/theme-nord_dark';
+import 'ace-builds/src-noconflict/theme-gruvbox';
+import 'ayu-ace/light';
+
 import 'ace-builds/src-noconflict/ext-language_tools';
 import ace from 'ace-builds';
 
