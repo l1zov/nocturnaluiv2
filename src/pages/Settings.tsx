@@ -24,7 +24,7 @@ export function Settings() {
               themeClasses.border.primary,
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75'
             )}>
-              {themeName}
+              {themeName.charAt(0).toUpperCase() + themeName.slice(1)}
               <ChevronDownIcon
                 className="-mr-1 ml-2 h-5 w-5"
                 aria-hidden="true"
@@ -41,7 +41,7 @@ export function Settings() {
             leaveTo="transform opacity-0 scale-95"
           >
             <Menu.Items className={themeClasses.combine(
-              "absolute right-0 mt-2 w-40 origin-top-right rounded-lg shadow-lg border focus:outline-none z-10",
+              "absolute right-0 mt-2 w-40 origin-top-right rounded-lg shadow-lg border focus:outline-none z-10 max-h-60 overflow-y-auto",
               themeClasses.bg.secondary,
               themeClasses.border.primary
             )}>
@@ -57,7 +57,7 @@ export function Settings() {
                         )}
                           group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                       >
-                        {theme}
+                        {theme.charAt(0).toUpperCase() + theme.slice(1)}
                       </button>
                     )}
                   </Menu.Item>
