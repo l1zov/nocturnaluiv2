@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { X, Minus, Square } from 'lucide-react';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import { listen } from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/core';
 
 export function Titlebar() {
   const [hovered, setHovered] = useState<string | null>(null);
@@ -12,14 +13,21 @@ export function Titlebar() {
   useEffect(() => {
     let unlistenFn: (() => void) | undefined;
 
-    const setupListener = async () => {
+    const setup = async () => {
+      try {
+        const initialStatus = await invoke<boolean>('check_connection_command');
+        setIsConnected(initialStatus);
+      } catch (error) {
+        console.error(error);
+      }
+
       const unlisten = await listen<{ connected: boolean }>('connection-status-changed', (event) => {
         setIsConnected(event.payload.connected);
       });
       unlistenFn = unlisten;
     };
 
-    setupListener();
+    setup();
 
     return () => {
       if (unlistenFn) {
