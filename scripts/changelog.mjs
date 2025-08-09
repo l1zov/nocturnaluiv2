@@ -31,6 +31,20 @@ function getLastTag() {
   return run('git describe --tags --abbrev=0');
 }
 
+function tagExists(tag) {
+  if (!tag) return false;
+  const exact = run(`git rev-parse -q --verify refs/tags/${tag}`);
+  if (exact) return true;
+  const pref = run(`git rev-parse -q --verify refs/tags/v${tag}`);
+  return !!pref;
+}
+
+function getTagsSorted() {
+  const out = run('git tag --list --sort=-creatordate');
+  if (!out) return [];
+  return out.split('\n').filter(Boolean);
+}
+
 function getOriginRepo() {
   const remote = run('git remote get-url origin') || '';
   // git@github.com:user/repo.git OR https://github.com/user/repo.git
@@ -39,9 +53,10 @@ function getOriginRepo() {
   return null;
 }
 
-function getCommits(range) {
+function getCommits(range, includeMerges) {
   const rangeArg = range ? `${range}` : '';
-  const out = run(`git log --no-merges --pretty=format:%H%x09%s ${rangeArg}`);
+  const mergesFlag = includeMerges ? '' : '--no-merges';
+  const out = run(`git log ${mergesFlag} --pretty=format:%H%x09%s ${rangeArg}`);
   if (!out) return [];
   return out.split('\n').filter(Boolean).map(line => {
     const [hash, ...rest] = line.split('\t');
@@ -63,9 +78,10 @@ function groupCommits(commits) {
     ci: [],
     chore: [],
     revert: [],
+    styles: [],
     other: [],
   };
-  const ccRe = /^(?<type>feat|fix|perf|refactor|docs|style|test|build|ci|chore|revert)(!?)(\((?<scope>[^)]+)\))?:\s*(?<desc>.+)$/i;
+  const ccRe = /^(?<type>feat|fix|perf|refactor|docs|style|styles|test|build|ci|chore|revert)(!?)(\((?<scope>[^)]+)\))?:\s*(?<desc>.+)$/i;
   for (const c of commits) {
     const m = ccRe.exec(c.subject);
     if (m && m.groups) {
@@ -153,12 +169,30 @@ async function main() {
   const lastTag = getLastTag();
   const repo = getOriginRepo();
 
+  // --since <ref> [--until <ref>] [--include-merges]
+  const args = process.argv.slice(2);
+  const sinceIdx = args.indexOf('--since');
+  const untilIdx = args.indexOf('--until');
+  const includeMerges = args.includes('--include-merges');
+  const sinceRef = sinceIdx !== -1 && args[sinceIdx + 1] ? args[sinceIdx + 1] : null;
+  const untilRef = untilIdx !== -1 && args[untilIdx + 1] ? args[untilIdx + 1] : 'HEAD';
+
   let range = '';
-  if (lastTag) {
-    range = `${lastTag}..HEAD`;
+  if (sinceRef) {
+    range = `${sinceRef}..${untilRef}`;
+  } else {
+    let base = lastTag;
+    const tags = getTagsSorted();
+    if (tags.length) {
+      const idx = tags.findIndex(t => t === version || t === `v${version}`);
+      if (idx !== -1 && idx + 1 < tags.length) {
+        base = tags[idx + 1];
+      }
+    }
+    if (base) range = `${base}..HEAD`;
   }
 
-  const commits = getCommits(range);
+  const commits = getCommits(range, includeMerges);
   if (!commits.length) {
     console.log('no commits found for changelog');
     return;
