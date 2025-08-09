@@ -64,6 +64,8 @@ export function Editor() {
   const [closingTabId, setClosingTabId] = useState<number | null>(null);
   const [renamingTab, setRenamingTab] = useState<{ id: number; title: string; initialWidth: number } | null>(null);
   const hoverTimeout = useRef<number | null>(null);
+  const editorRef = useRef<any>(null);
+  const handleExecuteRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const styleId = 'dynamic-scrollbar-styles';
@@ -290,6 +292,10 @@ export function Editor() {
     }
   };
 
+  useEffect(() => {
+    handleExecuteRef.current = handleExecute;
+  }, [handleExecute]);
+
   return (
     <div className="flex-1 flex flex-col bg-transparent">
                   <div className={theme.combine("flex items-center border-b", theme.border.primary)}>
@@ -381,6 +387,14 @@ export function Editor() {
           mode="lua"
           theme={currentTheme.editorTheme}
           onChange={handleEditorChange}
+          onLoad={(editor) => {
+            editorRef.current = editor;
+            editor.commands.addCommand({
+              name: 'executeScript',
+              bindKey: { mac: 'Command-Enter' },
+              exec: () => handleExecuteRef.current(),
+            });
+          }}
           value={activeTab?.content || ''}
           name="nocturnal_ace_editor"
           height="100%"
