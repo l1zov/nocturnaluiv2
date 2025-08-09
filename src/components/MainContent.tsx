@@ -1,23 +1,10 @@
-import { useEffect, useState } from 'react';
-import { getVersion } from '@tauri-apps/api/app';
+import { useState } from 'react';
 import { useThemeClasses } from '../hooks/useThemeClasses';
+import { APP_VERSION } from '../appVersion';
 
 export function MainContent() {
   const theme = useThemeClasses();
-  const [appVersion, setAppVersion] = useState<string>('');
-  
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const v = await getVersion();
-        if (mounted) setAppVersion(v);
-      } catch {
-        if (mounted) setAppVersion('dev');
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
+  const [appVersion] = useState<string>(APP_VERSION);
   
   const updates = [
     { version: '25.4.1', description: 'Join our discord server.' },

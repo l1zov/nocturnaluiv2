@@ -25,11 +25,38 @@ npm install
 echo "Frontend dependencies are up to date."
 
 echo "Syncing project version..."
-# Forward any CLI args (e.g., --patch 3) to the version script
-node ./scripts/version.mjs "$@"
+USE_CURRENT=true
+VERSION_FLAGS=()
+ARGS=("$@")
+ARGC=${#ARGS[@]}
+IDX=0
+while [ $IDX -lt $ARGC ]; do
+  arg="${ARGS[$IDX]}"
+  case "$arg" in
+    --lunar)
+      USE_CURRENT=false
+      ;;
+    --patch)
+      if [ $((IDX+1)) -lt $ARGC ]; then
+        VERSION_FLAGS+=("--patch" "${ARGS[$((IDX+1))]}")
+        IDX=$((IDX+1))
+      fi
+      ;;
+    --patch=*)
+      VERSION_FLAGS+=("$arg")
+      ;;
+  esac
+  IDX=$((IDX+1))
+done
+
+if [ "$USE_CURRENT" = true ]; then
+  VERSION_FLAGS+=("--use-current")
+fi
+
+node ./scripts/version.mjs "${VERSION_FLAGS[@]}"
 
 echo "Building the universal application..."
-(cd src-tauri && cargo clean)
+# (cd src-tauri && cargo clean)
 npm run tauri -- build --target universal-apple-darwin
 
 if [ $? -ne 0 ]; then
