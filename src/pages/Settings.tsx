@@ -8,6 +8,12 @@ import { useThemeClasses } from '../hooks/useThemeClasses';
 export function Settings() {
   const { setTheme, themeName } = useTheme();
   const themeClasses = useThemeClasses();
+  
+  const formatThemeLabel = (key: string) => {
+    if (key === 'github') return 'Github Light';
+    if (key === 'ayu') return 'Ayu Light';
+    return key.charAt(0).toUpperCase() + key.slice(1);
+  };
 
   return (
     <div className={themeClasses.combine("p-4", themeClasses.text.primary)}>
@@ -24,7 +30,7 @@ export function Settings() {
               themeClasses.border.primary,
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75'
             )}>
-              {themeName.charAt(0).toUpperCase() + themeName.slice(1)}
+              {formatThemeLabel(themeName)}
               <ChevronDownIcon
                 className="-mr-1 ml-2 h-5 w-5"
                 aria-hidden="true"
@@ -57,7 +63,7 @@ export function Settings() {
                         )}
                           group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                       >
-                        {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                        {formatThemeLabel(theme)}
                       </button>
                     )}
                   </Menu.Item>
