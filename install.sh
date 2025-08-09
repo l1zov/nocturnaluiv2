@@ -25,8 +25,19 @@ echo "Required tools are present."
 echo "Getting the latest release..."
 
 LATEST_RELEASE_JSON=$(curl -s "https://api.github.com/repos/$REPO/releases/latest")
-DMG_URL=$(echo "$LATEST_RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith(".dmg")) | .browser_download_url')
-VERSION=$(echo "$LATEST_RELEASE_JSON" | jq -r '.tag_name')
+VERSION_TAG=$(echo "$LATEST_RELEASE_JSON" | jq -r '.tag_name')
+VERSION=${VERSION_TAG#v}
+
+EXPECTED="Nocturnal UI_${VERSION}_universal.dmg"
+DMG_URL=$(echo "$LATEST_RELEASE_JSON" | jq -r --arg expected "$EXPECTED" '.assets[] | select(.name == $expected) | .browser_download_url' | head -n 1)
+
+if [ -z "$DMG_URL" ] || [ "$DMG_URL" = "null" ]; then
+  DMG_URL=$(echo "$LATEST_RELEASE_JSON" | jq -r '.assets[] | select(.name | test("^Nocturnal UI_.*_universal\\.dmg$")) | .browser_download_url' | head -n 1)
+fi
+
+if [ -z "$DMG_URL" ] || [ "$DMG_URL" = "null" ]; then
+  DMG_URL=$(echo "$LATEST_RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith(".dmg")) | .browser_download_url' | head -n 1)
+fi
 
 if [ -z "$DMG_URL" ] || [ "$DMG_URL" == "null" ]; then
     echo "Could not find a .dmg file in the latest release."
@@ -34,7 +45,10 @@ if [ -z "$DMG_URL" ] || [ "$DMG_URL" == "null" ]; then
     exit 1
 fi
 
-DMG_NAME=$(basename "$DMG_URL")
+DMG_NAME=$(echo "$LATEST_RELEASE_JSON" | jq -r --arg url "$DMG_URL" '.assets[] | select(.browser_download_url == $url) | .name' | head -n 1)
+if [ -z "$DMG_NAME" ] || [ "$DMG_NAME" = "null" ]; then
+  DMG_NAME=$(basename "$DMG_URL")
+fi
 DOWNLOAD_PATH="/tmp/$DMG_NAME"
 
 echo "Downloading the latest release: $DMG_NAME"
@@ -47,42 +61,7 @@ fi
 
 if [[ "$VERSION" == dev-* ]]; then
   cat << "EOF"
-
-DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV
-████████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████████
-█████████████████████████████████   ████████████████████████
-███████████████████████████████████     ████████████████████
-████████████████████████████████████       █████████████████
-█████████████████████████████████████▒       ███████████████
-██████████████████████████████████████         █████████████
-███████████████████████████████████████         ████████████
-████████████████████████████████████████         ███████████
-████████████████████████████████████████          ██████████
-████████████████████████████████████████           █████████
-████████████████████████████████████████           █████████
-████████████████████████████████████████            ████████
-████████████████████████████████████████            ████████
-███████████████████████████████████████             ████████
-███████████████████████████████████████             ████████
-██████████████████████████████████████              ████████
-████████████████████████████████████               █████████
-███████████████████████████████████                █████████
-█████████████████████████████████                 ██████████
-█████████  ███████████████████                   ███████████
-██████████     ███████████                      ████████████
-███████████░                                   █████████████
-█████████████                                ███████████████
-███████████████                            █████████████████
-██████████████████                      ████████████████████
-██████████████████████░            ░████████████████████████
-████████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████████
-████████████████████████████████████████████████████████████
-DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV DEV 
+  Bleh.
 EOF
 else
   cat << "EOF"
@@ -144,7 +123,6 @@ if [ -z "$MOUNT_POINT" ]; then
     exit 1
 fi
 
-# Find the .app directory in the mounted volume
 SOURCE_APP_PATH=$(find "$MOUNT_POINT" -name "*.app" -maxdepth 1)
 
 if [ -z "$SOURCE_APP_PATH" ]; then

@@ -1,18 +1,35 @@
+import { useEffect, useState } from 'react';
+import { getVersion } from '@tauri-apps/api/app';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 
 export function MainContent() {
   const theme = useThemeClasses();
+  const [appVersion, setAppVersion] = useState<string>('');
+  
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const v = await getVersion();
+        if (mounted) setAppVersion(v);
+      } catch {
+        if (mounted) setAppVersion('dev');
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
   
   const updates = [
+    { version: '25.4.1', description: 'Join our discord server.' },
+    { version: 'dev 2', description: "Added Tabs Renaming. Fixes."},
     { version: 'dev 1', description: 'v2 first dev version' },
-    { version: 'dev 2', description: "Added Tabs Renaming. Fixes."}
   ];
 
   return (
     <main className="flex-1 flex flex-col items-center p-10 pt-20">
       <div className="text-center">
         <h1 className={theme.combine("text-4xl font-bold", theme.text.primary)}>Welcome to Nocturnal UI</h1>
-        <p className={theme.combine("mt-2", theme.text.muted)}>Version 2.0.0 (pre-release)</p>
+        <p className={theme.combine("mt-2", theme.text.muted)}>Version {appVersion || '...'}</p>
       </div>
       <div className="mt-10 w-full max-w-2xl">
         <h2 className={theme.combine("text-lg font-semibold", theme.text.primary)}>Recent Updates</h2>

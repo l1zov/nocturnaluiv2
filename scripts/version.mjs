@@ -1,0 +1,111 @@
+#!/usr/bin/env node
+import { promises as fs } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const root = path.resolve(__dirname, '..');
+
+const paths = {
+  packageJson: path.join(root, 'package.json'),
+  tauriConf: path.join(root, 'src-tauri', 'tauri.conf.json'),
+  cargoToml: path.join(root, 'src-tauri', 'Cargo.toml'),
+};
+
+function julianDay(date) {
+  return date.getTime() / 86400000 + 2440587.5;
+}
+
+function moonPhaseIndex(date = new Date()) {
+  const jd = julianDay(date);
+  const knownNew = 2451550.1;
+  const synodic = 29.53058867;
+  const cycles = (jd - knownNew) / synodic;
+  const frac = cycles - Math.floor(cycles);
+  const idx = Math.floor(frac * 8 + 0.5) % 8;
+  return idx;
+}
+
+function buildVersion(date = new Date(), current, overridePatch) {
+  const yy = String(date.getUTCFullYear() % 100).padStart(2, '0');
+  const mp = String(moonPhaseIndex(date)); 
+
+  let patch;
+  const hasOverride = overridePatch !== undefined && overridePatch !== null && !Number.isNaN(Number(overridePatch));
+  if (hasOverride) {
+    patch = Number(overridePatch);
+  } else {
+    patch = 0;
+    const m = /^\s*(\d{2})\.(\d)\.(\d+)\s*$/.exec(current || '');
+    if (m) {
+      const [_, curYY, curMP, curP] = m;
+      if (curYY === yy && curMP === mp) {
+        patch = Number(curP) + 1;
+      }
+    }
+  }
+  return `${yy}.${mp}.${patch}`;
+}
+
+function getPatchOverride() {
+  const envVal = process.env.LUNAR_PATCH;
+  if (envVal !== undefined && envVal !== '') {
+    const n = Number(envVal);
+    if (Number.isInteger(n) && n >= 0) return n;
+  }
+  const args = process.argv.slice(2);
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--patch' && i + 1 < args.length) {
+      const n = Number(args[i + 1]);
+      if (Number.isInteger(n) && n >= 0) return n;
+      i++;
+    } else if (a.startsWith('--patch=')) {
+      const val = a.split('=')[1];
+      const n = Number(val);
+      if (Number.isInteger(n) && n >= 0) return n;
+    }
+  }
+  return undefined;
+}
+
+async function readJson(p) {
+  const raw = await fs.readFile(p, 'utf8');
+  return JSON.parse(raw);
+}
+
+async function writeJson(p, data) {
+  const content = JSON.stringify(data, null, 2) + '\n';
+  await fs.writeFile(p, content, 'utf8');
+}
+
+async function updateCargoToml(filePath, version) {
+  const raw = await fs.readFile(filePath, 'utf8');
+  const updated = raw.replace(/(^\s*version\s*=\s*")([^"]+)("\s*$)/m, (_m, a, _b, c) => `${a}${version}${c}`);
+  await fs.writeFile(filePath, updated, 'utf8');
+}
+
+async function main() {
+  const pkg = await readJson(paths.packageJson);
+  const current = pkg.version || '';
+  const patchOverride = getPatchOverride();
+  const next = buildVersion(new Date(), current, patchOverride);
+
+  pkg.version = next;
+  await writeJson(paths.packageJson, pkg);
+
+
+  const tauri = await readJson(paths.tauriConf);
+  tauri.version = next;
+  await writeJson(paths.tauriConf, tauri);
+
+  await updateCargoToml(paths.cargoToml, next);
+
+  console.log(`set project version to ${next}`);
+}
+
+main().catch((err) => {
+  console.error('version script failed:', err);
+  process.exit(1);
+});

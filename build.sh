@@ -23,6 +23,11 @@ echo "Required Rust targets are configured."
 echo "Installing frontend dependencies..."
 npm install
 echo "Frontend dependencies are up to date."
+
+echo "Syncing project version..."
+# Forward any CLI args (e.g., --patch 3) to the version script
+node ./scripts/version.mjs "$@"
+
 echo "Building the universal application..."
 (cd src-tauri && cargo clean)
 npm run tauri -- build --target universal-apple-darwin
