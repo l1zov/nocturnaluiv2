@@ -51,7 +51,7 @@
             "dmg"
         ],
         "icon": [
-            "../public/AppIcon.icns"
+            "../public/assets/AppIcon.icns"
         ]
     }
 }
