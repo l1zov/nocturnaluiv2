@@ -1,52 +1,59 @@
 export interface ThemeColors {
-  background: {
-    primary: string;
-    secondary: string;
-    tertiary: string;
-    hover: string;
-    active: string;
-  };
+    background: {
+        primary: string;
+        secondary: string;
+        tertiary: string;
+        hover: string;
+        active: string;
+    };
 
-  text: {
-    primary: string;
-    secondary: string;
-    tertiary: string;
-    muted: string;
-    accent: string;
-  };
+    text: {
+        primary: string;
+        secondary: string;
+        tertiary: string;
+        muted: string;
+        accent: string;
+    };
 
-  border: {
-    primary: string;
-    secondary: string;
-    accent: string;
-  };
+    border: {
+        primary: string;
+        secondary: string;
+        accent: string;
+    };
 
-  accent: {
-    primary: string;
-    secondary: string;
-    success: string;
-    warning: string;
-    error: string;
-  };
-  
-  // focus ring
-  focus: {
-    ring: string;
-  };
-  
-  // window controls
-  controls: {
-    close: string;
-    minimize: string;
-    maximize: string;
-  };
+    accent: {
+        primary: string;
+        secondary: string;
+        success: string;
+        warning: string;
+        error: string;
+    };
+
+    // focus ring
+    focus: {
+        ring: string;
+    };
+
+    // window controls
+    controls: {
+        close: string;
+        minimize: string;
+        maximize: string;
+    };
 }
 
 export interface Theme {
-  name: string;
-  colors: ThemeColors;
-  editorTheme: string;
-  video?: string;
+    name: string;
+    colors: ThemeColors;
+    editorTheme: string;
+    video?: string;
 }
 
-export type ThemeName = 'dracula' | 'tomorrow-night' | 'github' | 'glassy' | 'cobalt' | 'terminal' | 'twilight';
+export type ThemeName =
+    | "dracula"
+    | "tomorrow-night"
+    | "github"
+    | "glassy"
+    | "cobalt"
+    | "terminal"
+    | "twilight";
