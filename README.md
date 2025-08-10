@@ -40,3 +40,9 @@ npm run tauri dev
 ```bash
 chmod +x ./
 ```
+
+## Contact
+
+- Email: lzov@cutetw.ink
+- Discord: @lzov 
+- Discord Server: https://discord.gg/aCcm2ux2
