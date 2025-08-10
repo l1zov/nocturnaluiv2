@@ -16,6 +16,7 @@
     "@tauri-apps/api": "^2.7.0",
     "ace-builds": "^1.43.2",
     "ayu-ace": "^2.0.4",
+    "framer-motion": "^12.23.12",
     "lucide-react": "^0.526.0",
     "react": "^19.1.0",
     "react-ace": "^14.0.1",
