@@ -1,36 +1,36 @@
 {
-  "name": "nocturnaluiv2",
-  "private": true,
-  "version": "25.4.1",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "changelog": "node ./scripts/changelog.mjs",
-    "tauri": "tauri"
-  },
-  "dependencies": {
-    "@headlessui/react": "^2.2.6",
-    "@tailwindcss/vite": "^4.1.11",
-    "@tauri-apps/api": "^2.7.0",
-    "ace-builds": "^1.43.2",
-    "ayu-ace": "^2.0.4",
-    "framer-motion": "^12.23.12",
-    "lucide-react": "^0.526.0",
-    "react": "^19.1.0",
-    "react-ace": "^14.0.1",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^7.7.1",
-    "tailwindcss": "^4.1.11"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.1.4",
-    "@tauri-apps/cli": "^2.7.1",
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
-    "@vitejs/plugin-react": "^4.6.0",
-    "typescript": "~5.8.3",
-    "vite": "^7.0.4"
-  }
+    "name": "nocturnaluiv2",
+    "private": true,
+    "version": "25.4.1",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "changelog": "node ./scripts/changelog.mjs",
+        "tauri": "tauri"
+    },
+    "dependencies": {
+        "@headlessui/react": "^2.2.6",
+        "@tailwindcss/vite": "^4.1.11",
+        "@tauri-apps/api": "^2.7.0",
+        "ace-builds": "^1.43.2",
+        "ayu-ace": "^2.0.4",
+        "lucide-react": "^0.526.0",
+        "motion": "^12.23.12",
+        "react": "^19.1.0",
+        "react-ace": "^14.0.1",
+        "react-dom": "^19.1.0",
+        "react-router-dom": "^7.7.1",
+        "tailwindcss": "^4.1.11"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "2.1.4",
+        "@tauri-apps/cli": "^2.7.1",
+        "@types/react": "^19.1.9",
+        "@types/react-dom": "^19.1.7",
+        "@vitejs/plugin-react": "^4.6.0",
+        "typescript": "~5.8.3",
+        "vite": "^7.0.4"
+    }
 }
