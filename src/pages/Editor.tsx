@@ -1,9 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useState } from "react";
-import { EditorContent } from "../components/editor/EditorContent";
-import { EditorControls } from "../components/editor/EditorControls";
-import { useEditorStyles } from "../components/editor/EditorStyles";
-import { TabBar } from "../components/editor/TabBar";
+import { EditorContent } from "../components/editor/editorContent";
+import { EditorControls } from "../components/editor/editorControls";
+import { useEditorStyles } from "../components/editor/editorStyles";
+import { TabBar } from "../components/editor/tabBar";
 import type { Tab } from "../types/editor";
 
 import "ace-builds/src-noconflict/mode-lua";
