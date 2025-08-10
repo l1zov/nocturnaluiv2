@@ -37,13 +37,13 @@ function getLastTag() {
     return run("git describe --tags --abbrev=0");
 }
 
-function tagExists(tag) {
-    if (!tag) return false;
-    const exact = run(`git rev-parse -q --verify refs/tags/${tag}`);
-    if (exact) return true;
-    const pref = run(`git rev-parse -q --verify refs/tags/v${tag}`);
-    return !!pref;
-}
+// function tagExists(tag) {
+//     if (!tag) return false;
+//     const exact = run(`git rev-parse -q --verify refs/tags/${tag}`);
+//     if (exact) return true;
+//     const pref = run(`git rev-parse -q --verify refs/tags/v${tag}`);
+//     return !!pref;
+// }
 
 function getTagsSorted() {
     const out = run("git tag --list --sort=-creatordate");
