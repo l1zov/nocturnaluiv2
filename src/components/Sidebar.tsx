@@ -65,7 +65,7 @@ export function Sidebar() {
     return (
         <aside
             className={THEME.combine(
-                "w-48 flex flex-col border-r h-full",
+                "w-48 shrink-0 flex flex-col border-r h-full",
                 THEME.border.primary,
             )}
         >

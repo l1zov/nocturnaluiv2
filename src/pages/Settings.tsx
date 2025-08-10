@@ -50,14 +50,14 @@ export function Settings() {
     };
 
     return (
-        <div className={themeClasses.combine("p-4", themeClasses.text.primary)}>
-            <h1 className="text-2xl font-bold mb-4">Settings</h1>
+        <div className={themeClasses.combine("container mx-auto px-4 py-4 w-full flex flex-col min-w-0", themeClasses.text.primary)}>
+            <h1 className="text-2xl font-bold mb-4 text-center">Settings</h1>
 
             <Tab.Group selectedIndex={tabIndex} onChange={setTabIndex}>
                 <Tab.List
                     ref={listRef}
                     className={themeClasses.combine(
-                        "relative flex gap-0 p-0 rounded-lg border items-stretch overflow-x-auto overflow-y-hidden h-10",
+                        "relative flex gap-0 p-0 rounded-lg border items-stretch h-10 w-fit mx-auto",
                         themeClasses.bg.secondary,
                         themeClasses.border.primary,
                     )}
@@ -99,7 +99,7 @@ export function Settings() {
                     ))}
                 </Tab.List>
 
-                <Tab.Panels className="mt-4">
+                <Tab.Panels className="mt-8 w-full max-w-3xl mx-auto px-6">
                     <Tab.Panel>
                         <div className="space-y-4">
                             <p className="text-sm opacity-80">Nothing here to see.</p>
