@@ -1,13 +1,13 @@
 import "./App.css";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { MainContent } from "./components/MainContent";
-import { Sidebar } from "./components/Sidebar";
-import { Titlebar } from "./components/Titlebar";
-import VideoBackground from "./components/VideoBackground";
+import { MainContent } from "./components/mainContent";
+import { Sidebar } from "./components/sidebar";
+import { Titlebar } from "./components/titlebar";
+import VideoBackground from "./components/videoBackground";
 import { ThemeProvider, useTheme } from "./context/themeContext";
 import { useThemeClasses } from "./hooks/useThemeClasses";
-import { Editor } from "./pages/Editor";
-import { Settings } from "./pages/Settings";
+import { Editor } from "./pages/editor";
+import { Settings } from "./pages/settings";
 
 function App() {
     return (
