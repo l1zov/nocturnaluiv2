@@ -1,5 +1,3 @@
-# 
-
 <p align="center">
   <img src=".github/assets/Nocturnal.png" alt="Nocturnal UI Logo" width="128" height="128" />
 </p>
@@ -7,7 +5,7 @@
 <h1 align="center">Nocturnal UI</h1>
 
 <p align="center">
-  A fast, themeable, tabbed Hydrogen UI built with <b>Tauri</b> + <b>React</b>. It features an <b>Ace</b>-powered editor, smart Lua autocompletion from the Rust/Tauri backend, script execution, and persistent tabs/settings.
+  A fast, themeable, tabbed <a href="https://www.hydrogen.lat/">Hydrogen</a> UI built with <b>Tauri</b> + <b>React</b>. It features an <b>Ace</b>-powered editor, smart Lua autocompletion from the Rust/Tauri backend, script execution, and persistent tabs/settings.
 </p>
 
 <p align="center">
@@ -31,10 +29,20 @@
 npm run tauri dev
 ```
 
-### Bundle & Build
+### Installation
+
+You can easily install Nocturnal UI using the provided installation script:
 
 ```bash
-chmod +x ./
+./public/resourses/install.sh
+```
+
+### Building from Source
+
+To build Nocturnal UI from source, use the build script:
+
+```bash
+./public/resourses/build.sh
 ```
 
 ## Contact
