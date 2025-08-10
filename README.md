@@ -1,6 +1,14 @@
-# Nocturnal UI
+# 
 
- A fast, themeable, tabbed Hydrogen UI built with **Tauri** + **React**. It features an **Ace**-powered editor, smart Lua autocompletion from the Rust/Tauri backend, script execution, and persistent tabs/settings.
+<p align="center">
+  <img src=".github/assets/Nocturnal.png" alt="Nocturnal UI Logo" width="128" height="128" />
+</p>
+
+<h1 align="center">Nocturnal UI</h1>
+
+<p align="center">
+  A fast, themeable, tabbed Hydrogen UI built with <b>Tauri</b> + <b>React</b>. It features an <b>Ace</b>-powered editor, smart Lua autocompletion from the Rust/Tauri backend, script execution, and persistent tabs/settings.
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Tauri-FFC131?style=for-the-badge&logo=tauri&logoColor=black" />
@@ -14,18 +22,6 @@
   <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white" />
   <img src="https://img.shields.io/github/downloads/l1zov/nocturnaluiv2/total?style=for-the-badge&logo=github&logoColor=white&color=181717" />
 </p>
-
-## Overview
-
-
-
-## Features
-
-
-
-## Theming
-
-
 
 ## Getting Started
 
