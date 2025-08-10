@@ -8,17 +8,17 @@ import { useThemeClasses } from "../hooks/useThemeClasses";
 export function Titlebar() {
     const [hovered, setHovered] = useState<string | null>(null);
     const [isConnected, setIsConnected] = useState(false);
-    const theme = useThemeClasses();
+    const THEME = useThemeClasses();
 
     useEffect(() => {
         let unlistenFn: (() => void) | undefined;
 
         const setup = async () => {
             try {
-                const initialStatus = await invoke<boolean>(
+                const INITIAL_STATUS = await invoke<boolean>(
                     "check_connection_command",
                 );
-                setIsConnected(initialStatus);
+                setIsConnected(INITIAL_STATUS);
             } catch (error) {
                 console.error(error);
             }
@@ -44,30 +44,30 @@ export function Titlebar() {
     return (
         <div
             data-tauri-drag-region
-            className={theme.combine(
+            className={THEME.combine(
                 "h-10 flex justify-between items-center px-4 border-b select-none",
-                theme.border.primary,
+                THEME.border.primary,
             )}
         >
             <div className="flex items-center">
                 <span
-                    className={theme.combine(
+                    className={THEME.combine(
                         "text-sm font-medium",
-                        theme.text.primary,
+                        THEME.text.primary,
                     )}
                 >
                     Nocturnal UI
                 </span>
                 <span
-                    className={theme.combine(
+                    className={THEME.combine(
                         "text-xs mx-2",
-                        theme.text.tertiary,
+                        THEME.text.tertiary,
                     )}
                 >
                     |
                 </span>
                 <span
-                    className={theme.combine("text-xs", theme.text.secondary)}
+                    className={THEME.combine("text-xs", THEME.text.secondary)}
                 >
                     {isConnected ? "Connected" : "Not connected"}
                 </span>
@@ -77,9 +77,9 @@ export function Titlebar() {
                     onClick={() => getCurrentWindow().close()}
                     onMouseEnter={() => setHovered("close")}
                     onMouseLeave={() => setHovered(null)}
-                    className={theme.combine(
+                    className={THEME.combine(
                         "w-3 h-3 rounded-full relative",
-                        theme.controls.close,
+                        THEME.controls.close,
                     )}
                     type="button"
                 >
@@ -93,9 +93,9 @@ export function Titlebar() {
                     onClick={() => getCurrentWindow().minimize()}
                     onMouseEnter={() => setHovered("minimize")}
                     onMouseLeave={() => setHovered(null)}
-                    className={theme.combine(
+                    className={THEME.combine(
                         "w-3 h-3 rounded-full relative",
-                        theme.controls.minimize,
+                        THEME.controls.minimize,
                     )}
                     type="button"
                 >
@@ -109,9 +109,9 @@ export function Titlebar() {
                     onClick={() => getCurrentWindow().toggleMaximize()}
                     onMouseEnter={() => setHovered("maximize")}
                     onMouseLeave={() => setHovered(null)}
-                    className={theme.combine(
+                    className={THEME.combine(
                         "w-3 h-3 rounded-full relative",
-                        theme.controls.maximize,
+                        THEME.controls.maximize,
                     )}
                     type="button"
                 >
