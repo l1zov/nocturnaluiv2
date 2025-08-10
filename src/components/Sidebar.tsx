@@ -47,7 +47,7 @@ export function Sidebar() {
     ) => (
         <nav className="flex flex-col w-full">
             {links.map((link) => {
-                const IS_ACTIVE = location.pathname === link.href;
+                const IS_ACTIVE = LOCATION.pathname === link.href;
                 return (
                     <Link
                         key={link.href}
