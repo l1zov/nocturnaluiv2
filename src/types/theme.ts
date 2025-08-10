@@ -1,3 +1,6 @@
+import type { ReactNode } from "react";
+import type { themes } from "../themes";
+
 export interface ThemeColors {
     background: {
         primary: string;
@@ -57,3 +60,17 @@ export type ThemeName =
     | "cobalt"
     | "terminal"
     | "twilight";
+
+export type AvailableThemes = keyof typeof themes;
+
+export interface ThemeContextType {
+    currentTheme: Theme;
+    themeName: AvailableThemes;
+    setTheme: (themeName: AvailableThemes) => void;
+    loading: boolean;
+}
+
+export interface ThemeProviderProps {
+    children: ReactNode;
+    defaultTheme?: AvailableThemes;
+}

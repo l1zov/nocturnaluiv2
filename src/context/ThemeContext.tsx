@@ -1,22 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
-import {
-    createContext,
-    type ReactNode,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { themes } from "../themes";
-import type { Theme } from "../types/theme";
-
-type AvailableThemes = keyof typeof themes;
-
-interface ThemeContextType {
-    currentTheme: Theme;
-    themeName: AvailableThemes;
-    setTheme: (themeName: AvailableThemes) => void;
-    loading: boolean;
-}
+import type {
+    AvailableThemes,
+    ThemeContextType,
+    ThemeProviderProps,
+} from "../types/theme";
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
@@ -26,11 +15,6 @@ export function useTheme() {
         throw new Error("useTheme must be used within a ThemeProvider");
     }
     return context;
-}
-
-interface ThemeProviderProps {
-    children: ReactNode;
-    defaultTheme?: AvailableThemes;
 }
 
 export function ThemeProvider({
