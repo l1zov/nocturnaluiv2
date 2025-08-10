@@ -56,6 +56,7 @@ export function Settings() {
                   <Menu.Item key={theme}>
                     {({ active }) => (
                       <button
+                        type="button"
                         onClick={() => setTheme(theme as keyof typeof themes)}
                         className={`${themeClasses.combine(
                           active ? themeClasses.bg.active : '',
