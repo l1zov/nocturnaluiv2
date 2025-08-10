@@ -28,7 +28,7 @@ export function Sidebar() {
     return (
         <aside
             className={theme.combine(
-                "w-56 flex flex-col border-r",
+                "w-48 flex flex-col border-r",
                 theme.border.primary,
             )}
         >
