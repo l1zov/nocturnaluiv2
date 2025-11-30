@@ -9,6 +9,25 @@ use tauri_plugin_store::StoreExt;
 const SETTINGS_PATH: &str = ".settings.dat";
 
 #[tauri::command]
+fn close_window(window: tauri::Window) {
+    window.close().unwrap();
+}
+
+#[tauri::command]
+fn minimize_window(window: tauri::Window) {
+    window.minimize().unwrap();
+}
+
+#[tauri::command]
+fn toggle_maximize_window(window: tauri::Window) {
+    if window.is_maximized().unwrap() {
+        window.unmaximize().unwrap();
+    } else {
+        window.maximize().unwrap();
+    }
+}
+
+#[tauri::command]
 fn check_hydrogen_installation() -> bool {
     let roblox_player_copy_path = std::path::Path::new("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer.copy");
     roblox_player_copy_path.exists()
@@ -257,6 +276,9 @@ pub fn run() {
             execute_script_command,
             check_connection_command,
             check_hydrogen_installation,
+            close_window,
+            minimize_window,
+            toggle_maximize_window,
             tabs::get_tabs,
             tabs::get_active_tab,
             tabs::add_tab,

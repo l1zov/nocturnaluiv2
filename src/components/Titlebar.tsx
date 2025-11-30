@@ -1,4 +1,3 @@
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useState, useEffect } from 'react';
 import { X, Minus, Square } from 'lucide-react';
 import { useThemeClasses } from '../hooks/useThemeClasses';
@@ -50,7 +49,13 @@ export function Titlebar() {
       </div>
       <div className="flex items-center space-x-2">
         <button
-          onClick={() => getCurrentWindow().close()}
+          onClick={async () => {
+            try {
+              await invoke('close_window');
+            } catch (error) {
+              console.error(error);
+            }
+          }}
           onMouseEnter={() => setHovered('close')}
           onMouseLeave={() => setHovered(null)}
           className={theme.combine("w-3 h-3 rounded-full relative", theme.controls.close)}
@@ -62,7 +67,13 @@ export function Titlebar() {
           )}
         </button>
         <button
-          onClick={() => getCurrentWindow().minimize()}
+          onClick={async () => {
+            try {
+              await invoke('minimize_window');
+            } catch (error) {
+              console.error(error);
+            }
+          }}
           onMouseEnter={() => setHovered('minimize')}
           onMouseLeave={() => setHovered(null)}
           className={theme.combine("w-3 h-3 rounded-full relative", theme.controls.minimize)}
@@ -74,7 +85,13 @@ export function Titlebar() {
           )}
         </button>
         <button
-          onClick={() => getCurrentWindow().toggleMaximize()}
+          onClick={async () => {
+            try {
+              await invoke('toggle_maximize_window');
+            } catch (error) {
+              console.error(error);
+            }
+          }}
           onMouseEnter={() => setHovered('maximize')}
           onMouseLeave={() => setHovered(null)}
           className={theme.combine("w-3 h-3 rounded-full relative", theme.controls.maximize)}
