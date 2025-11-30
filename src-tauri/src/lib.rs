@@ -234,7 +234,7 @@ pub fn run() {
             window.open_devtools();
 
                 #[cfg(target_os = "macos")]
-                apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(16.0))
+                apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(10.0))
                     .expect("failed to apply vibrancy");
 
             let app_handle = app.handle().clone();
