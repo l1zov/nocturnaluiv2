@@ -22,6 +22,8 @@ fn minimize_window(window: tauri::Window) {
 fn toggle_maximize_window(window: tauri::Window) {
     if window.is_maximized().unwrap() {
         window.unmaximize().unwrap();
+        // std::thread::sleep(std::time::Duration::from_millis(150));
+        // let _ = apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(10.0));
     } else {
         window.maximize().unwrap();
     }
@@ -226,18 +228,32 @@ pub fn run() {
         .manage(Mutex::new(connection_manager))
         .setup(|app| {
             if !check_hydrogen_installation() {
-                let output = std::process::Command::new("osascript")
-                    .arg("-e")
-                    .arg("display dialog \"Hydrogen could not be found. Please make sure it is installed correctly.\" with title \"Nocturnal UI\" buttons {\"Quit\", \"Dismiss\"} default button \"Dismiss\" with icon caution")
-                    .output()
-                    .expect("osascript failed");
+                let store = app.store(PathBuf::from(SETTINGS_PATH)).ok();
+                let hide_hydrogen_warning = store
+                    .as_ref()
+                    .and_then(|s| s.get("hideHydrogenWarning"))
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
 
-                let stdout = String::from_utf8_lossy(&output.stdout);
+                if !hide_hydrogen_warning {
+                    let output = std::process::Command::new("osascript")
+                        .arg("-e")
+                        .arg("display dialog \"Hydrogen could not be found. Please make sure it is installed correctly.\" with title \"Nocturnal UI\" buttons {\"Don't Show Again\", \"Dismiss\"} default button \"Dismiss\" with icon caution")
+                        .output()
+                        .expect("osascript failed");
 
-                if !stdout.contains("button returned:Dismiss") {
-                    let handle = app.handle().clone();
-                    handle.exit(1);
-                    return Ok(());
+                    let stdout = String::from_utf8_lossy(&output.stdout);
+
+                    if stdout.contains("button returned:Don't Show Again") {
+                        if let Some(store) = store {
+                            store.set("hideHydrogenWarning", true);
+                            let _ = store.save();
+                        }
+                    } else if !stdout.contains("button returned:Dismiss") {
+                        let handle = app.handle().clone();
+                        handle.exit(1);
+                        return Ok(());
+                    }
                 }
             }
 
@@ -247,9 +263,9 @@ pub fn run() {
             #[cfg(debug_assertions)]
             window.open_devtools();
 
-                #[cfg(target_os = "macos")]
-                apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(10.0))
-                    .expect("failed to apply vibrancy");
+            #[cfg(target_os = "macos")]
+            apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(10.0))
+                .expect("failed to apply vibrancy");
 
             let app_handle = app.handle().clone();
 
