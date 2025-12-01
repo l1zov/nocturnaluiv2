@@ -1,3 +1,4 @@
+@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
 
 @keyframes close-tab-animation {
@@ -34,7 +35,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-@import "tailwindcss";
 
 body {
   font-family: sans-serif;
