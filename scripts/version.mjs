@@ -11,60 +11,62 @@ const paths = {
   packageJson: path.join(root, 'package.json'),
   tauriConf: path.join(root, 'src-tauri', 'tauri.conf.json'),
   cargoToml: path.join(root, 'src-tauri', 'Cargo.toml'),
+  appVersionTs: path.join(root, 'src', 'appVersion.ts'),
 };
 
-function julianDay(date) {
-  return date.getTime() / 86400000 + 2440587.5;
+/**
+ * CalVer format: YYYY.MM.R
+ * - YYYY: Full year
+ * - MM: Month (1-12)
+ * - R: Release number in that month
+ */
+
+function parseCalVer(version) {
+  const match = /^(\d{4})\.(\d{1,2})(?:\.(\d+))?$/.exec(version);
+  if (!match) return null;
+  return {
+    year: parseInt(match[1], 10),
+    month: parseInt(match[2], 10),
+    release: match[3] ? parseInt(match[3], 10) : 1,
+  };
 }
 
-function moonPhaseIndex(date = new Date()) {
-  const jd = julianDay(date);
-  const knownNew = 2451550.1;
-  const synodic = 29.53058867;
-  const cycles = (jd - knownNew) / synodic;
-  const frac = cycles - Math.floor(cycles);
-  const idx = Math.floor(frac * 8 + 0.5) % 8;
-  return idx;
+function formatCalVer(year, month, release) {
+  // semver compatibility 
+  return `${year}.${month}.${release}`;
 }
 
-function buildVersion(date = new Date(), current, overridePatch) {
-  const yy = String(date.getUTCFullYear() % 100).padStart(2, '0');
-  const mp = String(moonPhaseIndex(date)); 
+function buildVersion(date = new Date(), currentVersion) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1; // 1-12
 
-  let patch;
-  const hasOverride = overridePatch !== undefined && overridePatch !== null && !Number.isNaN(Number(overridePatch));
-  if (hasOverride) {
-    patch = Number(overridePatch);
-  } else {
-    patch = 0;
-    const m = /^\s*(\d{2})\.(\d)\.(\d+)\s*$/.exec(current || '');
-    if (m) {
-      const [_, curYY, curMP, curP] = m;
-      if (curYY === yy && curMP === mp) {
-        patch = Number(curP) + 1;
-      }
-    }
+  const current = parseCalVer(currentVersion);
+  
+  if (current && current.year === year && current.month === month) {
+    return formatCalVer(year, month, current.release + 1);
   }
-  return `${yy}.${mp}.${patch}`;
+  
+  return formatCalVer(year, month, 1);
 }
 
-function getPatchOverride() {
-  const envVal = process.env.LUNAR_PATCH;
+function getReleaseOverride() {
+  const envVal = process.env.CALVER_RELEASE;
   if (envVal !== undefined && envVal !== '') {
     const n = Number(envVal);
-    if (Number.isInteger(n) && n >= 0) return n;
+    if (Number.isInteger(n) && n >= 1) return n;
   }
+  
   const args = process.argv.slice(2);
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
-    if (a === '--patch' && i + 1 < args.length) {
+    if (a === '--release' && i + 1 < args.length) {
       const n = Number(args[i + 1]);
-      if (Number.isInteger(n) && n >= 0) return n;
+      if (Number.isInteger(n) && n >= 1) return n;
       i++;
-    } else if (a.startsWith('--patch=')) {
+    } else if (a.startsWith('--release=')) {
       const val = a.split('=')[1];
       const n = Number(val);
-      if (Number.isInteger(n) && n >= 0) return n;
+      if (Number.isInteger(n) && n >= 1) return n;
     }
   }
   return undefined;
@@ -82,7 +84,10 @@ async function writeJson(p, data) {
 
 async function updateCargoToml(filePath, version) {
   const raw = await fs.readFile(filePath, 'utf8');
-  const updated = raw.replace(/(^\s*version\s*=\s*")([^"]+)("\s*$)/m, (_m, a, _b, c) => `${a}${version}${c}`);
+  const updated = raw.replace(
+    /(^\s*version\s*=\s*")([^"]+)("\s*$)/m,
+    (_m, a, _b, c) => `${a}${version}${c}`
+  );
   await fs.writeFile(filePath, updated, 'utf8');
 }
 
@@ -91,18 +96,18 @@ async function main() {
   const current = pkg.version || '';
 
   const args = process.argv.slice(2);
-  const modeEnv = (process.env.LUNAR_MODE || '').toLowerCase();
-  const useCurrent = args.includes('--use-current') || modeEnv === 'sync';
+  const useCurrent = args.includes('--use-current') || process.env.CALVER_MODE === 'sync';
 
-  const patchOverride = getPatchOverride();
   let next = current;
+  
   if (!useCurrent) {
-    next = buildVersion(new Date(), current, patchOverride);
-  } else if (patchOverride !== undefined) {
-    const m = /^\s*(\d{2})\.(\d)\.(\d+)\s*$/.exec(current || '');
-    if (m) {
-      const [_, curYY, curMP] = m;
-      next = `${curYY}.${curMP}.${Number(patchOverride)}`;
+    const releaseOverride = getReleaseOverride();
+    
+    if (releaseOverride !== undefined) {
+      const date = new Date();
+      next = formatCalVer(date.getFullYear(), date.getMonth() + 1, releaseOverride);
+    } else {
+      next = buildVersion(new Date(), current);
     }
   }
 
@@ -111,18 +116,16 @@ async function main() {
     await writeJson(paths.packageJson, pkg);
   }
 
-
   const tauri = await readJson(paths.tauriConf);
   tauri.version = next;
   await writeJson(paths.tauriConf, tauri);
 
   await updateCargoToml(paths.cargoToml, next);
 
-  const appVersionTsPath = path.join(root, 'src', 'appVersion.ts');
   const tsContent = `// AUTO-GENERATED by scripts/version.mjs\nexport const APP_VERSION = '${next}';\n`;
-  await fs.writeFile(appVersionTsPath, tsContent, 'utf8');
+  await fs.writeFile(paths.appVersionTs, tsContent, 'utf8');
 
-  console.log(`set project version to ${next}`);
+  console.log(`version set to ${next}`);
 }
 
 main().catch((err) => {

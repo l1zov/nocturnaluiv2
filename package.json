@@ -1,7 +1,7 @@
 {
   "name": "nocturnaluiv2",
   "private": true,
-  "version": "25.4.1",
+  "version": "2025.12.1",
   "type": "module",
   "scripts": {
     "dev": "vite",

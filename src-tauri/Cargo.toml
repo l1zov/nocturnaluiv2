@@ -1,6 +1,6 @@
 [package]
 name = "nocturnaluiv2"
-version = "25.4.1"
+version = "2025.12.1"
 description = "A Tauri App"
 authors = ["lzov"]
 edition = "2021"
