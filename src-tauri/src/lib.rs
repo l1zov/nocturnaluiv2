@@ -29,7 +29,8 @@ fn toggle_maximize_window(window: tauri::Window) {
 
 #[tauri::command]
 fn check_hydrogen_installation() -> bool {
-    let roblox_player_copy_path = std::path::Path::new("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer.copy");
+    let roblox_player_copy_path =
+        std::path::Path::new("/Applications/Roblox.app/Contents/MacOS/RobloxPlayer.copy");
     roblox_player_copy_path.exists()
 }
 
@@ -40,7 +41,9 @@ fn greet(name: &str) -> String {
 
 #[tauri::command]
 fn save_settings(app: tauri::AppHandle, key: String, value: String) -> Result<(), String> {
-    let store = app.store(PathBuf::from(SETTINGS_PATH)).map_err(|e| e.to_string())?;
+    let store = app
+        .store(PathBuf::from(SETTINGS_PATH))
+        .map_err(|e| e.to_string())?;
     store.set(key, value);
     store.save().map_err(|e| e.to_string())?;
     Ok(())
@@ -48,8 +51,12 @@ fn save_settings(app: tauri::AppHandle, key: String, value: String) -> Result<()
 
 #[tauri::command]
 fn load_settings(app: tauri::AppHandle, key: String) -> Result<Option<String>, String> {
-    let store = app.store(PathBuf::from(SETTINGS_PATH)).map_err(|e| e.to_string())?;
-    Ok(store.get(key).and_then(|v| v.as_str().map(|s| s.to_string())))
+    let store = app
+        .store(PathBuf::from(SETTINGS_PATH))
+        .map_err(|e| e.to_string())?;
+    Ok(store
+        .get(key)
+        .and_then(|v| v.as_str().map(|s| s.to_string())))
 }
 
 #[tauri::command]
@@ -73,12 +80,12 @@ async fn fetch_suggestions_command() -> Result<serde_json::Value, String> {
     Ok(suggestions)
 }
 
-use tauri::Manager;
-use tokio::sync::Mutex;
-use tauri::async_runtime::spawn;
-use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 use reqwest::Client;
 use std::time::Duration;
+use tauri::async_runtime::spawn;
+use tauri::Manager;
+use tokio::sync::Mutex;
+use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
 const HOST: &str = "127.0.0.1";
 
@@ -152,12 +159,19 @@ impl ConnectionManager {
 
             if let Some(port) = self.port {
                 let url = format!("http://{}:{}/execute", self.details.host, port);
-                match self.client.post(&url).header("Content-Type", "text/plain").body(script.to_string()).send().await {
+                match self
+                    .client
+                    .post(&url)
+                    .header("Content-Type", "text/plain")
+                    .body(script.to_string())
+                    .send()
+                    .await
+                {
                     Ok(response) => {
                         if response.status().is_success() {
                             return Ok(true);
                         } else {
-                            self.port = None; 
+                            self.port = None;
                         }
                     }
                     Err(_) => {
