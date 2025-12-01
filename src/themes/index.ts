@@ -83,7 +83,7 @@ export const tomorrowNightTheme: Theme = {
 };
 
 export const githubTheme: Theme = {
-  name: 'github',
+  name: 'github-light',
   editorTheme: 'github',
   colors: {
     background: {
@@ -288,7 +288,7 @@ export const twilightTheme: Theme = {
 };
 
 export const ayuTheme: Theme = {
-  name: 'ayu',
+  name: 'ayu-light',
   editorTheme: 'ace/theme/ayu-light',
   colors: {
     background: {
@@ -455,12 +455,12 @@ export const themes = {
   default: defaultTheme,
   dracula: draculaTheme,
   'tomorrow-night': tomorrowNightTheme,
-  github: githubTheme,
+  'github-light': githubTheme,
   glassy: glassyTheme,
   cobalt: cobaltTheme,
   terminal: terminalTheme,
   twilight: twilightTheme,
-  ayu: ayuTheme,
+  'ayu-light': ayuTheme,
   nord: nordTheme,
   gruvbox: gruvboxTheme,
 } as const;
