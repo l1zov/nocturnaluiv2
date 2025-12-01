@@ -49,4 +49,4 @@ export interface Theme {
   video?: string;
 }
 
-export type ThemeName = 'dracula' | 'tomorrow-night' | 'github' | 'glassy' | 'cobalt' | 'terminal' | 'twilight';
+export type ThemeName = 'default' | 'dracula' | 'tomorrow-night' | 'github' | 'glassy' | 'cobalt' | 'terminal' | 'twilight' | 'ayu' | 'nord' | 'gruvbox';

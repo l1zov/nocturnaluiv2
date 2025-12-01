@@ -16,6 +16,7 @@ import 'ace-builds/src-noconflict/theme-twilight';
 import 'ace-builds/src-noconflict/theme-nord_dark';
 import 'ace-builds/src-noconflict/theme-gruvbox';
 import 'ayu-ace/light';
+import '../themes/ace-default';
 
 import 'ace-builds/src-noconflict/ext-language_tools';
 import ace from 'ace-builds';

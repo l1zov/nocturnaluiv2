@@ -58,7 +58,8 @@ body {
 
 .theme-dracula .ace_gutter-active-line,
 .theme-tomorrow-night .ace_gutter-active-line,
-.theme-glassy .ace_gutter-active-line {
+.theme-glassy .ace_gutter-active-line,
+.theme-default .ace_gutter-active-line {
   color: #fff !important;
 }
 

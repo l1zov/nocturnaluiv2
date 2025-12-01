@@ -410,7 +410,49 @@ export const gruvboxTheme: Theme = {
   },
 };
 
+export const defaultTheme: Theme = {
+  name: 'default',
+  editorTheme: 'default_dark',
+  colors: {
+    background: {
+      primary: 'bg-[#0d0d0d]',
+      secondary: 'bg-[#1a1a1a]',
+      tertiary: 'bg-[#2b2b2b]',
+      hover: 'hover:bg-[#2b2b2b]/50',
+      active: 'bg-[#2b2b2b]/50',
+    },
+    text: {
+      primary: 'text-[#f7f7f7]',
+      secondary: 'text-[#f7f7f7]/75',
+      tertiary: 'text-[#f7f7f7]/50',
+      muted: 'text-[#aaaaaa]',
+      accent: 'text-[#f7f7f7]',
+    },
+    border: {
+      primary: 'border-[#202020]',
+      secondary: 'border-[#333333]',
+      accent: 'border-[#404040]',
+    },
+    accent: {
+      primary: 'bg-[#f7f7f7]',
+      secondary: 'bg-[#333333]',
+      success: 'bg-[#22c55e]',
+      warning: 'bg-[#eab308]',
+      error: 'bg-[#dc2626]',
+    },
+    focus: {
+      ring: 'focus:ring-[#404040]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
 export const themes = {
+  default: defaultTheme,
   dracula: draculaTheme,
   'tomorrow-night': tomorrowNightTheme,
   github: githubTheme,
