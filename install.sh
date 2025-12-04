@@ -71,7 +71,7 @@ fi
 
 VERSION=${VERSION_TAG#v}
 
-EXPECTED="Nocturnal UI_${VERSION}_universal.dmg"
+EXPECTED="Nocturnal.UI_${VERSION}_universal.dmg"
 DMG_URL=$(echo "$LATEST_RELEASE_JSON" | jq -r --arg expected "$EXPECTED" '.assets[] | select(.name == $expected) | .browser_download_url' | head -n 1)
 
 if [ -z "$DMG_URL" ] || [ "$DMG_URL" = "null" ]; then
