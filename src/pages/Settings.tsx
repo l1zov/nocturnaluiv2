@@ -1,13 +1,41 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { themes } from '../themes';
 import { useThemeClasses } from '../hooks/useThemeClasses';
+// import { settingsService, DEFAULT_SETTINGS } from '../services';
 
 export function Settings() {
   const { setTheme, themeName } = useTheme();
   const themeClasses = useThemeClasses();
+
+  // const initial = settingsService.get() || DEFAULT_SETTINGS;
+  // const [fontFamily, setFontFamily] = useState<string>(String(initial.fontFamily || DEFAULT_SETTINGS.fontFamily));
+  // const [fontSize, setFontSize] = useState<number>(Number(initial.fontSize || DEFAULT_SETTINGS.fontSize));
+  // const [autosave, setAutosave] = useState<boolean>(Boolean(initial.autosave));
+  // const [autosaveIntervalSec, setAutosaveIntervalSec] = useState<number>(Number(initial.autosaveIntervalSec || DEFAULT_SETTINGS.autosaveIntervalSec));
+  // const [showLineNumbers, setShowLineNumbers] = useState<boolean>(Boolean(initial.showLineNumbers));
+
+  // useEffect(() => {
+  //   const unsub = settingsService.subscribe((s) => {
+  //     setFontFamily(String(s.fontFamily || DEFAULT_SETTINGS.fontFamily));
+  //     setFontSize(Number(s.fontSize || DEFAULT_SETTINGS.fontSize));
+  //     setAutosave(Boolean(s.autosave));
+  //     setAutosaveIntervalSec(Number(s.autosaveIntervalSec || DEFAULT_SETTINGS.autosaveIntervalSec));
+  //     setShowLineNumbers(Boolean(s.showLineNumbers));
+  //   });
+  //   return () => unsub && unsub();
+  // }, []);
+
+  // const applySetting = (key: string, value: unknown) => {
+  //   try {
+  //     // prefer typed setter when possible
+  //     settingsService.set({ [key]: value } as any);
+  //   } catch (e) {
+  //     // swallow
+  //   }
+  // }
 
   return (
     <div className={themeClasses.combine("p-4", themeClasses.text.primary)}>

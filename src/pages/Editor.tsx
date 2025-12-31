@@ -6,7 +6,7 @@ import { useThemeClasses } from '../hooks/useThemeClasses';
 import { useThemeRawColors } from '../hooks/useThemeRawColors';
 import { invoke } from '@tauri-apps/api/core';
 import { suggestionService } from '../services/suggestionService';
-import { editorService } from '../services';
+import { editorService, settingsService } from '../services';
 
 import 'ace-builds/src-noconflict/mode-lua';
 import 'ace-builds/src-noconflict/theme-github';
@@ -64,6 +64,10 @@ export function Editor() {
   const hoverTimeout = useRef<number | null>(null);
   const editorRef = useRef<any>(null);
   const handleExecuteRef = useRef<() => void>(() => {});
+  const initialSettings = settingsService.get();
+  const [fontFamily, setFontFamily] = useState<string>(initialSettings.fontFamily as string);
+  const [fontSize, setFontSize] = useState<number>(initialSettings.fontSize as number);
+  const [showLineNumbers, setShowLineNumbers] = useState<boolean>(Boolean(initialSettings.showLineNumbers));
 
   useEffect(() => {
     const unsub = editorService.subscribe((doc) => {
@@ -192,6 +196,15 @@ export function Editor() {
     return () => {
       clearInterval(interval);
     };
+  }, []);
+
+  useEffect(() => {
+    const unsub = settingsService.subscribe((s) => {
+      setFontFamily(s.fontFamily as string);
+      setFontSize(s.fontSize as number);
+      setShowLineNumbers(Boolean(s.showLineNumbers));
+    });
+    return () => unsub && unsub();
   }, []);
 
   
@@ -417,10 +430,11 @@ export function Editor() {
           height="100%"
           width="100%"
           showPrintMargin={false}
+          showGutter={showLineNumbers}
           editorProps={{ $blockScrolling: true }}
           setOptions={{
-            fontFamily: 'Fira Code',
-            fontSize: 16,
+            fontFamily,
+            fontSize,
             enableBasicAutocompletion: true,
             enableLiveAutocompletion: true,
             highlightActiveLine: false,
