@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import { useThemeRawColors } from '../hooks/useThemeRawColors';
 import { invoke } from '@tauri-apps/api/core';
+import { suggestionService } from '../services/suggestionService';
 
 import 'ace-builds/src-noconflict/mode-lua';
 import 'ace-builds/src-noconflict/theme-github';
@@ -29,15 +30,10 @@ async function fetchSuggestions(): Promise<any[]> {
     return suggestionCache;
   }
   try {
-    const data: any = await invoke('fetch_suggestions_command');
-    if (data && typeof data === 'object') {
-      const combinedSuggestions = [
-        ...(data.class || []),
-        ...(data.function || []),
-        ...(data.method || []),
-        ...(data.property || []),
-      ];
-      suggestionCache = combinedSuggestions;
+    await suggestionService.loadSuggestions();
+    const data: any[] = suggestionService.getSuggestions();
+    if (Array.isArray(data)) {
+      suggestionCache = data;
     } else {
       suggestionCache = [];
     }
