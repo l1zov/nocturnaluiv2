@@ -20,9 +20,15 @@ import 'ace-builds/src-noconflict/theme-nord_dark';
 import 'ace-builds/src-noconflict/theme-gruvbox';
 import 'ayu-ace/light';
 import '../themes/ace-default';
+import '../themes/ace-frappe-mist';
 
 import 'ace-builds/src-noconflict/ext-language_tools';
 import ace from 'ace-builds';
+
+try {
+  ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict');
+} catch (e) {
+}
 
 let suggestionCache: any[] = [];
 let suggestionsFetched = false;

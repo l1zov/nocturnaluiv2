@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-declare const ace: any;
 
 ace.define(
   'ace/theme/default_dark',

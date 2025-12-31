@@ -451,6 +451,47 @@ export const defaultTheme: Theme = {
   },
 };
 
+export const frappeMistTheme: Theme = {
+  name: 'frappe-mist',
+  editorTheme: 'frappe_mist',
+  colors: {
+    background: {
+      primary: 'bg-[#2E2A3E]',
+      secondary: 'bg-[#36344A]',
+      tertiary: 'bg-[#3E3A56]',
+      hover: 'hover:bg-[#4B4671]',
+      active: 'bg-[#564E7F]',
+    },
+    text: {
+      primary: 'text-[#CAD3F5]',
+      secondary: 'text-[#A6C8D9]',
+      tertiary: 'text-[#81C8BE]',
+      muted: 'text-[#626880]',
+      accent: 'text-[#E78284]',
+    },
+    border: {
+      primary: 'border-[#626880]',
+      secondary: 'border-[#4F4F70]',
+      accent: 'border-[#81C8BE]',
+    },
+    accent: {
+      primary: 'bg-[#81C8BE]',
+      secondary: 'bg-[#E78284]',
+      success: 'bg-[#A6D189]',
+      warning: 'bg-[#EBCB8B]',
+      error: 'bg-[#E78284]',
+    },
+    focus: {
+      ring: 'focus:ring-[rgba(198,208,245,0.45)]',
+    },
+    controls: {
+      close: 'bg-red-400',
+      minimize: 'bg-yellow-400',
+      maximize: 'bg-green-400',
+    },
+  },
+};
+
 export const themes = {
   default: defaultTheme,
   dracula: draculaTheme,
@@ -463,4 +504,5 @@ export const themes = {
   'ayu-light': ayuTheme,
   nord: nordTheme,
   gruvbox: gruvboxTheme,
+  'frappe-mist': frappeMistTheme,
 } as const;
