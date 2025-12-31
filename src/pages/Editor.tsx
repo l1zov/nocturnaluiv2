@@ -6,6 +6,7 @@ import { useThemeClasses } from '../hooks/useThemeClasses';
 import { useThemeRawColors } from '../hooks/useThemeRawColors';
 import { invoke } from '@tauri-apps/api/core';
 import { suggestionService } from '../services/suggestionService';
+import { editorService } from '../services';
 
 import 'ace-builds/src-noconflict/mode-lua';
 import 'ace-builds/src-noconflict/theme-github';
@@ -65,6 +66,11 @@ export function Editor() {
   const handleExecuteRef = useRef<() => void>(() => {});
 
   useEffect(() => {
+    const unsub = editorService.subscribe((doc) => {
+      if (doc) {
+        setActiveTab((prev: any) => (prev && prev.id === doc.id ? { ...prev, content: doc.content } : { ...doc }));
+      }
+    });
     const styleId = 'dynamic-scrollbar-styles';
     let styleElement = document.getElementById(styleId) as HTMLStyleElement | null;
 
@@ -92,6 +98,15 @@ export function Editor() {
         background: transparent;
       }
     `;
+
+    return () => {
+      try {
+        unsub && unsub()
+      } catch (e) {}
+      try {
+        if (styleElement && styleElement.parentNode) styleElement.parentNode.removeChild(styleElement)
+      } catch (e) {}
+    }
   }, []);
 
   useEffect(() => {
@@ -164,6 +179,9 @@ export function Editor() {
         const initialActiveTab = await invoke('get_active_tab');
         setTabs(initialTabs as any[]);
         setActiveTab(initialActiveTab);
+        if (initialActiveTab) {
+          editorService.open(initialActiveTab as any);
+        }
       } catch (error) {
         console.error("get tabs error:", error);
       }
@@ -181,11 +199,11 @@ export function Editor() {
   const handleEditorChange = (newContent: string) => {
     if (!activeTab) return;
 
+    // update service (which will notify subscribers) and persist to backend
+    editorService.updateContent(newContent);
     const updatedActiveTab = { ...activeTab, content: newContent };
     setActiveTab(updatedActiveTab);
-
     setTabs(tabs.map(tab => tab.id === activeTab.id ? updatedActiveTab : tab));
-
     invoke('update_tab_content', { id: activeTab.id, content: newContent });
   };
 
@@ -195,6 +213,7 @@ export function Editor() {
       const updatedTabs: any = await invoke('get_tabs');
       setTabs(updatedTabs);
       setActiveTab(newTab);
+      if (newTab) editorService.open(newTab as any);
     } catch (error) {
       console.error("add tab error:", error);
     }
@@ -210,6 +229,7 @@ export function Editor() {
       const newActiveTab = tabs.find(t => t.id === id);
       if (newActiveTab) {
         setActiveTab(newActiveTab);
+        editorService.open(newActiveTab as any);
       }
     } catch (error) {
       console.error("active tab error:", error);
