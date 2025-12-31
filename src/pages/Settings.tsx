@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
