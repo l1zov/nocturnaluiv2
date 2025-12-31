@@ -1,6 +1,7 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 
 mod tabs;
+mod updater;
 
 use std::path::PathBuf;
 use tauri::Emitter;
@@ -267,6 +268,10 @@ pub fn run() {
             apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, Some(10.0))
                 .expect("failed to apply vibrancy");
 
+            spawn(async move {
+                updater::check_and_prompt_update().await;
+            });
+
             let app_handle = app.handle().clone();
 
             spawn(async move {
@@ -315,7 +320,8 @@ pub fn run() {
             tabs::close_tab,
             tabs::set_active_tab,
             tabs::rename_tab,
-            tabs::update_tab_content
+            tabs::update_tab_content,
+            updater::check_for_updates_command
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
