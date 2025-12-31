@@ -15,58 +15,45 @@ const paths = {
 };
 
 /**
- * CalVer format: YYYY.MM.R
- * - YYYY: Full year
- * - MM: Month (1-12)
- * - R: Release number in that month
+ * SemVer helper: Major.Minor.Patch
+ * - supports flags: --use-current, --major[=N], --minor[=N], --patch[=N], --set X.Y.Z
  */
 
-function parseCalVer(version) {
-  const match = /^(\d{4})\.(\d{1,2})(?:\.(\d+))?$/.exec(version);
+function parseSemVer(version) {
+  if (!version) return null;
+  const ver = version.split('-')[0].trim();
+  const match = /^(?:v)?(\d+)\.(\d+)\.(\d+)$/.exec(ver);
   if (!match) return null;
   return {
-    year: parseInt(match[1], 10),
-    month: parseInt(match[2], 10),
-    release: match[3] ? parseInt(match[3], 10) : 1,
+    major: parseInt(match[1], 10),
+    minor: parseInt(match[2], 10),
+    patch: parseInt(match[3], 10),
   };
 }
 
-function formatCalVer(year, month, release) {
-  // semver compatibility 
-  return `${year}.${month}.${release}`;
+function formatSemVer(major, minor, patch) {
+  return `${major}.${minor}.${patch}`;
 }
 
-function buildVersion(date = new Date(), currentVersion) {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1; // 1-12
-
-  const current = parseCalVer(currentVersion);
-  
-  if (current && current.year === year && current.month === month) {
-    return formatCalVer(year, month, current.release + 1);
-  }
-  
-  return formatCalVer(year, month, 1);
-}
-
-function getReleaseOverride() {
-  const envVal = process.env.CALVER_RELEASE;
-  if (envVal !== undefined && envVal !== '') {
-    const n = Number(envVal);
-    if (Number.isInteger(n) && n >= 1) return n;
-  }
-  
+function getOverrideFromArgs() {
   const args = process.argv.slice(2);
+  const simpleSemVerRe = /^(?:v)?\d+\.\d+\.\d+$/;
+  if (args.length && simpleSemVerRe.test(args[0])) return args[0];
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
-    if (a === '--release' && i + 1 < args.length) {
-      const n = Number(args[i + 1]);
-      if (Number.isInteger(n) && n >= 1) return n;
-      i++;
-    } else if (a.startsWith('--release=')) {
-      const val = a.split('=')[1];
-      const n = Number(val);
-      if (Number.isInteger(n) && n >= 1) return n;
+    if (a.startsWith('--set=')) return args[i].split('=')[1];
+    if (a === '--set' && i + 1 < args.length) return args[i + 1];
+    if (a.startsWith('--major')) {
+      const val = a.includes('=') ? a.split('=')[1] : args[i + 1];
+      return { bump: 'major', value: val && !a.includes('=') ? undefined : Number(val) };
+    }
+    if (a.startsWith('--minor')) {
+      const val = a.includes('=') ? a.split('=')[1] : args[i + 1];
+      return { bump: 'minor', value: val && !a.includes('=') ? undefined : Number(val) };
+    }
+    if (a.startsWith('--patch')) {
+      const val = a.includes('=') ? a.split('=')[1] : args[i + 1];
+      return { bump: 'patch', value: val && !a.includes('=') ? undefined : Number(val) };
     }
   }
   return undefined;
@@ -93,21 +80,45 @@ async function updateCargoToml(filePath, version) {
 
 async function main() {
   const pkg = await readJson(paths.packageJson);
-  const current = pkg.version || '';
+  const current = pkg.version || '0.0.0';
 
   const args = process.argv.slice(2);
-  const useCurrent = args.includes('--use-current') || process.env.CALVER_MODE === 'sync';
+  const useCurrent = args.includes('--use-current');
 
   let next = current;
-  
+
   if (!useCurrent) {
-    const releaseOverride = getReleaseOverride();
-    
-    if (releaseOverride !== undefined) {
-      const date = new Date();
-      next = formatCalVer(date.getFullYear(), date.getMonth() + 1, releaseOverride);
+    const override = getOverrideFromArgs();
+    if (typeof override === 'string') {
+      // explicit set
+      next = override;
+    } else if (override && typeof override === 'object') {
+      const cur = parseSemVer(current) || { major: 0, minor: 0, patch: 0 };
+      const bump = override.bump;
+      const val = override.value;
+      if (bump === 'major') {
+        if (Number.isInteger(val)) {
+          next = formatSemVer(val, 0, 0);
+        } else {
+          next = formatSemVer(cur.major + 1, 0, 0);
+        }
+      } else if (bump === 'minor') {
+        if (Number.isInteger(val)) {
+          next = formatSemVer(cur.major, val, 0);
+        } else {
+          next = formatSemVer(cur.major, cur.minor + 1, 0);
+        }
+      } else if (bump === 'patch') {
+        if (Number.isInteger(val)) {
+          next = formatSemVer(cur.major, cur.minor, val);
+        } else {
+          next = formatSemVer(cur.major, cur.minor, cur.patch + 1);
+        }
+      }
     } else {
-      next = buildVersion(new Date(), current);
+      // default: bump patch
+      const cur = parseSemVer(current) || { major: 0, minor: 0, patch: 0 };
+      next = formatSemVer(cur.major, cur.minor, cur.patch + 1);
     }
   }
 

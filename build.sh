@@ -33,16 +33,49 @@ IDX=0
 while [ $IDX -lt $ARGC ]; do
   arg="${ARGS[$IDX]}"
   case "$arg" in
-    --lunar)
+    --no-sync)
       USE_CURRENT=false
+      ;;
+    --major)
+      if [ $((IDX+1)) -lt $ARGC ]; then
+        VERSION_FLAGS+=("--major" "${ARGS[$((IDX+1))]}")
+        IDX=$((IDX+1))
+      else
+        VERSION_FLAGS+=("--major")
+      fi
+      ;;
+    --major=*)
+      VERSION_FLAGS+=("$arg")
+      ;;
+    --minor)
+      if [ $((IDX+1)) -lt $ARGC ]; then
+        VERSION_FLAGS+=("--minor" "${ARGS[$((IDX+1))]}")
+        IDX=$((IDX+1))
+      else
+        VERSION_FLAGS+=("--minor")
+      fi
+      ;;
+    --minor=*)
+      VERSION_FLAGS+=("$arg")
       ;;
     --patch)
       if [ $((IDX+1)) -lt $ARGC ]; then
         VERSION_FLAGS+=("--patch" "${ARGS[$((IDX+1))]}")
         IDX=$((IDX+1))
+      else
+        VERSION_FLAGS+=("--patch")
       fi
       ;;
     --patch=*)
+      VERSION_FLAGS+=("$arg")
+      ;;
+    --set)
+      if [ $((IDX+1)) -lt $ARGC ]; then
+        VERSION_FLAGS+=("--set" "${ARGS[$((IDX+1))]}")
+        IDX=$((IDX+1))
+      fi
+      ;;
+    --set=*)
       VERSION_FLAGS+=("$arg")
       ;;
   esac

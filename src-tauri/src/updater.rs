@@ -13,17 +13,18 @@ struct GitHubRelease {
 }
 
 fn parse_version(version: &str) -> Option<(u32, u32, u32)> {
-    let version = version.trim_start_matches('v');
-    let parts: Vec<&str> = version.split('.').collect();
+    let v = version.trim_start_matches('v');
+    let core = v.split(|c| c == '-' || c == '+').next()?;
+    let parts: Vec<&str> = core.split('.').collect();
     if parts.len() != 3 {
         return None;
     }
 
-    let year = parts[0].parse::<u32>().ok()?;
-    let month = parts[1].parse::<u32>().ok()?;
+    let major = parts[0].parse::<u32>().ok()?;
+    let minor = parts[1].parse::<u32>().ok()?;
     let patch = parts[2].parse::<u32>().ok()?;
 
-    Some((year, month, patch))
+    Some((major, minor, patch))
 }
 
 fn is_newer_version(current: &str, remote: &str) -> bool {
@@ -35,8 +36,9 @@ fn is_newer_version(current: &str, remote: &str) -> bool {
 
 fn show_update_dialog(release_name: &str, version: &str, url: &str) -> UpdateAction {
     let message = format!(
-        "A new version of Nocturnal UI is available!\\n\\nNew version: {}\\nCurrent version: {}\\n\\nWould you like to view the release page?",
+        "A new version of Nocturnal UI is available!\\n\\nNew version: {} ({})\\nCurrent version: {}\\n\\nWould you like to view the release page?",
         release_name,
+        version,
         CURRENT_VERSION
     );
 

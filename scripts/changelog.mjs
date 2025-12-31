@@ -40,7 +40,8 @@ function tagExists(tag) {
 }
 
 function getTagsSorted() {
-  const out = run('git tag --list --sort=-creatordate');
+  let out = run('git tag --list --sort=-v:refname');
+  if (!out) out = run('git tag --list --sort=-creatordate');
   if (!out) return [];
   return out.split('\n').filter(Boolean);
 }

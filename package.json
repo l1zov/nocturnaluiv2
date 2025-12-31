@@ -1,7 +1,7 @@
 {
   "name": "nocturnaluiv2",
   "private": true,
-  "version": "2025.12.1",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,10 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "changelog": "node ./scripts/changelog.mjs",
+    "version": "node ./scripts/version.mjs",
+    "bump:major": "node ./scripts/version.mjs --major",
+    "bump:minor": "node ./scripts/version.mjs --minor",
+    "bump:patch": "node ./scripts/version.mjs --patch",
     "tauri": "tauri"
   },
   "dependencies": {
