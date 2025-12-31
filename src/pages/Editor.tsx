@@ -4,6 +4,7 @@ import AceEditor from 'react-ace';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import { useThemeRawColors } from '../hooks/useThemeRawColors';
+import useHotkey from '../hooks/useHotkey';
 import { invoke } from '@tauri-apps/api/core';
 import { suggestionService } from '../services/suggestionService';
 import { editorService, settingsService } from '../services';
@@ -325,6 +326,10 @@ export function Editor() {
   useEffect(() => {
     handleExecuteRef.current = handleExecute;
   }, [handleExecute]);
+
+  useHotkey(['meta+enter', 'ctrl+enter'], () => {
+    handleExecuteRef.current();
+  }, [isConnected, activeTab], { enabled: true, enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'], preventDefault: true });
 
   return (
     <div className="flex-1 flex flex-col bg-transparent">
