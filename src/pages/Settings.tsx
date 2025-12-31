@@ -28,6 +28,26 @@ export function Settings() {
   //   return () => unsub && unsub();
   // }, []);
 
+  useEffect(() => {
+    const styleId = 'theme-dropdown-scrollbar-styles';
+    let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+    styleEl.innerHTML = `
+      .theme-dropdown-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+      .theme-dropdown-scrollbar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.35); border-radius: 6px; }
+      .theme-dropdown-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.55); }
+      .theme-dropdown-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent; }
+    `;
+
+    return () => {
+      try { styleEl && styleEl.parentNode?.removeChild(styleEl); } catch (e) {}
+    };
+  }, []);
+
   // const applySetting = (key: string, value: unknown) => {
   //   try {
   //     // prefer typed setter when possible
@@ -68,11 +88,11 @@ export function Settings() {
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Menu.Items className={themeClasses.combine(
+            <Menu.Items className={`${themeClasses.combine(
               "absolute right-0 mt-2 w-40 origin-top-right rounded-lg shadow-lg border focus:outline-none z-10 max-h-60 overflow-y-auto",
               themeClasses.bg.secondary,
               themeClasses.border.primary
-            )}>
+            )} theme-dropdown-scrollbar`}>
               <div className="px-1 py-1 ">
                 {Object.keys(themes).map((theme) => (
                   <Menu.Item key={theme}>
