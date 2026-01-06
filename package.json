@@ -27,7 +27,8 @@
     "react-dom": "^19.1.0",
     "react-hotkeys-hook": "^5.2.1",
     "react-router-dom": "^7.7.1",
-    "tailwindcss": "^4.1.11"
+    "tailwindcss": "^4.1.11",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.7.1",

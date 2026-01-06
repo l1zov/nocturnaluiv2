@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
+import { useTitlebarStore } from '../store/titlebarStore';
 import {
   CloseNormalSVG,
   CloseHoverSVG,
@@ -12,8 +13,8 @@ import {
 } from './TrafficLightIcons';
 
 export function Titlebar() {
-  const [hovered, setHovered] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const { hoveredButton, setHoveredButton } = useTitlebarStore();
   const theme = useThemeClasses();
 
   useEffect(() => {
@@ -63,11 +64,11 @@ export function Titlebar() {
               console.error(error);
             }
           }}
-          onMouseEnter={() => setHovered('close')}
-          onMouseLeave={() => setHovered(null)}
+          onMouseEnter={() => setHoveredButton('close')}
+          onMouseLeave={() => setHoveredButton(null)}
           className="w-3 h-3 relative flex items-center justify-center"
         >
-          {hovered === 'close' ? <CloseHoverSVG /> : <CloseNormalSVG />}
+          {hoveredButton === 'close' ? <CloseHoverSVG /> : <CloseNormalSVG />}
         </button>
         <button
           onClick={async () => {
@@ -77,11 +78,11 @@ export function Titlebar() {
               console.error(error);
             }
           }}
-          onMouseEnter={() => setHovered('minimize')}
-          onMouseLeave={() => setHovered(null)}
+          onMouseEnter={() => setHoveredButton('minimize')}
+          onMouseLeave={() => setHoveredButton(null)}
           className="w-3 h-3 relative flex items-center justify-center"
         >
-          {hovered === 'minimize' ? <MinimizeHoverSVG /> : <MinimizeNormalSVG />}
+          {hoveredButton === 'minimize' ? <MinimizeHoverSVG /> : <MinimizeNormalSVG />}
         </button>
         <button
           onClick={async () => {
@@ -91,11 +92,11 @@ export function Titlebar() {
               console.error(error);
             }
           }}
-          onMouseEnter={() => setHovered('maximize')}
-          onMouseLeave={() => setHovered(null)}
+          onMouseEnter={() => setHoveredButton('maximize')}
+          onMouseLeave={() => setHoveredButton(null)}
           className="w-3 h-3 relative flex items-center justify-center"
         >
-          {hovered === 'maximize' ? <MaximizeHoverSVG /> : <MaximizeNormalSVG />}
+          {hoveredButton === 'maximize' ? <MaximizeHoverSVG /> : <MaximizeNormalSVG />}
         </button>
       </div>
     </div>
