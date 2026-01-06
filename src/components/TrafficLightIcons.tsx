@@ -34,6 +34,20 @@ export const CloseHoverSVG = () => (
   </svg>
 );
 
+export const ClosePressedSVG = () => (
+  <svg
+    enable-background="new 0 0 85.4 85.4"
+    viewBox="0 0 85.4 85.4"
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-full h-full"
+  >
+    <g clip-rule="evenodd" fill-rule="evenodd">
+      <path d="m42.7 85.4c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7-42.7 19.1-42.7 42.7 19.1 42.7 42.7 42.7z" fill="#a14239"/>
+      <path d="m42.7 81.8c21.6 0 39.1-17.5 39.1-39.1s-17.5-39.1-39.1-39.1-39.1 17.5-39.1 39.1 17.5 39.1 39.1 39.1z" fill="#b15048"/>
+    </g>
+  </svg>
+);
+
 export const MinimizeNormalSVG = () => (
   <svg
     enable-background="new 0 0 85.4 85.4"
@@ -63,6 +77,20 @@ export const MinimizeHoverSVG = () => (
   </svg>
 );
 
+export const MinimizePressedSVG = () => (
+  <svg
+    enable-background="new 0 0 85.4 85.4"
+    viewBox="0 0 85.4 85.4"
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-full h-full"
+  >
+    <g clip-rule="evenodd" fill-rule="evenodd">
+      <path d="m42.7 85.4c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7-42.7 19.1-42.7 42.7 19.1 42.7 42.7 42.7z" fill="#a67f36"/>
+      <path d="m42.7 81.8c21.6 0 39.1-17.5 39.1-39.1s-17.5-39.1-39.1-39.1-39.1 17.5-39.1 39.1 17.5 39.1 39.1 39.1z" fill="#b8923b"/>
+    </g>
+  </svg>
+);
+
 export const MaximizeNormalSVG = () => (
   <svg
     enable-background="new 0 0 85.4 85.4"
@@ -88,6 +116,20 @@ export const MaximizeHoverSVG = () => (
       <path d="m42.7 85.4c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7-42.7 19.1-42.7 42.7 19.1 42.7 42.7 42.7z" fill="#2dac2f"/>
       <path d="m42.7 81.8c21.6 0 39.1-17.5 39.1-39.1s-17.5-39.1-39.1-39.1-39.1 17.5-39.1 39.1c0 21.5 17.5 39.1 39.1 39.1z" fill="#61c555"/>
       <path d="m31.2 20.8h26.7c3.6 0 6.5 2.9 6.5 6.5v26.7zm23.2 43.7h-26.8c-3.6 0-6.5-2.9-6.5-6.5v-26.8z" fill="#2a6218"/>
+    </g>
+  </svg>
+);
+
+export const MaximizePressedSVG = () => (
+  <svg
+    enable-background="new 0 0 85.4 85.4"
+    viewBox="0 0 85.4 85.4"
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-full h-full"
+  >
+    <g clip-rule="evenodd" fill-rule="evenodd">
+      <path d="m42.7 85.4c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7-42.7 19.1-42.7 42.7 19.1 42.7 42.7 42.7z" fill="#428234"/>
+      <path d="m42.7 81.8c21.6 0 39.1-17.5 39.1-39.1s-17.5-39.1-39.1-39.1-39.1 17.5-39.1 39.1 17.5 39.1 39.1 39.1z" fill="#4a9741"/>
     </g>
   </svg>
 );
