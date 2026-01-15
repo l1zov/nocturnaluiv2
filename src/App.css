@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
 @import "tailwindcss";
 
+:root {
+  --font-mono: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
 @keyframes close-tab-animation {
   from {
     opacity: 1;
@@ -38,6 +42,11 @@ body {
 
 body {
   font-family: sans-serif;
+}
+
+.ace_editor,
+.ace_content {
+  font-family: var(--font-mono) !important;
 }
 
 .ace_gutter {
