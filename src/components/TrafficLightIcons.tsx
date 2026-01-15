@@ -1,4 +1,5 @@
 import {
+  unfocused,
   closeDefault,
   closeHover,
   closeActive,
@@ -9,6 +10,10 @@ import {
   maximizeHover,
   maximizeActive,
 } from 'macos-traffic-lights';
+
+export const TrafficLightUnfocusedSVG = () => (
+  <img src={unfocused} alt="unfocused" className="w-full h-full" />
+);
 
 export const CloseNormalSVG = () => (
   <img src={closeDefault} alt="close" className="w-full h-full" />

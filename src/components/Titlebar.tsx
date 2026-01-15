@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
+import { initializeWindowFocusListener } from '../services/windowFocusService';
 import { useTitlebarStore } from '../store/titlebarStore';
 import {
+  TrafficLightUnfocusedSVG,
   CloseNormalSVG,
   CloseHoverSVG,
   ClosePressedSVG,
@@ -17,11 +19,13 @@ import {
 
 export function Titlebar() {
   const [isConnected, setIsConnected] = useState(false);
+  const [isWindowFocused, setIsWindowFocused] = useState(true);
   const { hoveredButton, setHoveredButton, pressedButton, setPressedButton } = useTitlebarStore();
   const theme = useThemeClasses();
 
   useEffect(() => {
     let unlistenFn: (() => void) | undefined;
+    let cleanupFocusListener: (() => void) | undefined;
 
     const setup = async () => {
       try {
@@ -35,6 +39,11 @@ export function Titlebar() {
         setIsConnected(event.payload.connected);
       });
       unlistenFn = unlisten;
+
+      // Initialize window focus listener
+      cleanupFocusListener = await initializeWindowFocusListener((focused) => {
+        setIsWindowFocused(focused);
+      });
     };
 
     setup();
@@ -43,8 +52,25 @@ export function Titlebar() {
       if (unlistenFn) {
         unlistenFn();
       }
+      if (cleanupFocusListener) {
+        cleanupFocusListener();
+      }
     };
   }, []);
+
+  const renderTrafficLight = (
+    isFocused: boolean,
+    pressedState: string | null,
+    hoveredState: string | null,
+    normalComponent: React.ReactNode,
+    hoverComponent: React.ReactNode,
+    pressedComponent: React.ReactNode
+  ) => {
+    if (!isFocused) {
+      return <TrafficLightUnfocusedSVG />;
+    }
+    return pressedState ? pressedComponent : hoveredState ? hoverComponent : normalComponent;
+  };
 
   return (
     <div data-tauri-drag-region className={theme.combine(
@@ -73,7 +99,14 @@ export function Titlebar() {
           onMouseUp={() => setPressedButton(null)}
           className="w-3 h-3 relative flex items-center justify-center"
         >
-          {pressedButton === 'close' ? <ClosePressedSVG /> : hoveredButton === 'close' ? <CloseHoverSVG /> : <CloseNormalSVG />}
+          {renderTrafficLight(
+            isWindowFocused,
+            pressedButton === 'close' ? 'close' : null,
+            hoveredButton === 'close' ? 'close' : null,
+            <CloseNormalSVG />,
+            <CloseHoverSVG />,
+            <ClosePressedSVG />
+          )}
         </button>
         <button
           onClick={async () => {
@@ -89,7 +122,14 @@ export function Titlebar() {
           onMouseUp={() => setPressedButton(null)}
           className="w-3 h-3 relative flex items-center justify-center"
         >
-          {pressedButton === 'minimize' ? <MinimizePressedSVG /> : hoveredButton === 'minimize' ? <MinimizeHoverSVG /> : <MinimizeNormalSVG />}
+          {renderTrafficLight(
+            isWindowFocused,
+            pressedButton === 'minimize' ? 'minimize' : null,
+            hoveredButton === 'minimize' ? 'minimize' : null,
+            <MinimizeNormalSVG />,
+            <MinimizeHoverSVG />,
+            <MinimizePressedSVG />
+          )}
         </button>
         <button
           onClick={async () => {
@@ -105,7 +145,14 @@ export function Titlebar() {
           onMouseUp={() => setPressedButton(null)}
           className="w-3 h-3 relative flex items-center justify-center"
         >
-          {pressedButton === 'maximize' ? <MaximizePressedSVG /> : hoveredButton === 'maximize' ? <MaximizeHoverSVG /> : <MaximizeNormalSVG />}
+          {renderTrafficLight(
+            isWindowFocused,
+            pressedButton === 'maximize' ? 'maximize' : null,
+            hoveredButton === 'maximize' ? 'maximize' : null,
+            <MaximizeNormalSVG />,
+            <MaximizeHoverSVG />,
+            <MaximizePressedSVG />
+          )}
         </button>
       </div>
     </div>
