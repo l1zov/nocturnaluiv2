@@ -190,3 +190,35 @@ pub fn update_tab_content(
         Err("Tab not found.".to_string())
     }
 }
+
+#[tauri::command]
+pub fn reorder_tabs(
+    state: State<'_, AppState>,
+    tab_ids: Vec<usize>,
+    app_handle: AppHandle,
+) -> Result<Vec<Tab>, String> {
+    let mut state_guard = state.0.lock().map_err(|e| e.to_string())?;
+    
+    for id in &tab_ids {
+        if !state_guard.tabs.iter().any(|t| t.id == *id) {
+            return Err(format!("Tab with id {} not found", id));
+        }
+    }
+    
+    if tab_ids.len() != state_guard.tabs.len() {
+        return Err("Tab id list length mismatched".to_string());
+    }
+    
+    let mut reordered_tabs = Vec::new();
+    for id in tab_ids {
+        if let Some(tab) = state_guard.tabs.iter().find(|t| t.id == id).cloned() {
+            reordered_tabs.push(tab);
+        }
+    }
+    
+    state_guard.tabs = reordered_tabs.clone();
+    drop(state_guard);
+    save_state(&state, &app_handle)?;
+    
+    Ok(reordered_tabs)
+}

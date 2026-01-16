@@ -321,6 +321,7 @@ pub fn run() {
             tabs::set_active_tab,
             tabs::rename_tab,
             tabs::update_tab_content,
+            tabs::reorder_tabs,
             updater::check_for_updates_command
         ])
         .run(tauri::generate_context!())

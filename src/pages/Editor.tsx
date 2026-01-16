@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from 'react';
-import { X } from 'lucide-react';
 import AceEditor from 'react-ace';
 import { useTheme } from '../context/ThemeContext';
 import { useThemeClasses } from '../hooks/useThemeClasses';
@@ -7,7 +6,24 @@ import { useThemeRawColors } from '../hooks/useThemeRawColors';
 import useHotkey from '../hooks/useHotkey';
 import { invoke } from '@tauri-apps/api/core';
 import { suggestionService } from '../services/suggestionService';
-import { editorService, settingsService } from '../services';
+import { editorService, settingsService, tabsService } from '../services';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  horizontalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import 'ace-builds/src-noconflict/mode-lua';
 import 'ace-builds/src-noconflict/theme-github';
@@ -63,12 +79,9 @@ export function Editor() {
   const rawColors = useThemeRawColors();
   const [tabs, setTabs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<any>(null);
-  const [showCloseButton, setShowCloseButton] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-    const [isPressed, setIsPressed] = useState(false);
-  const [closingTabId, setClosingTabId] = useState<number | null>(null);
+  const [isPressed, setIsPressed] = useState(false);
   const [renamingTab, setRenamingTab] = useState<{ id: number; title: string; initialWidth: number } | null>(null);
-  const hoverTimeout = useRef<number | null>(null);
   const editorRef = useRef<any>(null);
   const handleExecuteRef = useRef<() => void>(() => {});
   const initialSettings = settingsService.get();
@@ -184,24 +197,20 @@ export function Editor() {
     checkConnection();
     const interval = setInterval(checkConnection, 1000);
 
-    const initTabs = async () => {
-      try {
-        const initialTabs = await invoke('get_tabs');
-        const initialActiveTab = await invoke('get_active_tab');
-        setTabs(initialTabs as any[]);
-        setActiveTab(initialActiveTab);
-        if (initialActiveTab) {
-          editorService.open(initialActiveTab as any);
-        }
-      } catch (error) {
-        console.error("get tabs error:", error);
+    const unsubTabs = tabsService.subscribe((tabs, activeTabId) => {
+      setTabs(tabs);
+      const activeTab = tabs.find(t => t.id === activeTabId);
+      if (activeTab) {
+        setActiveTab(activeTab);
+        editorService.open(activeTab as any);
       }
-    };
+    });
 
-    initTabs();
+    tabsService.fetchTabs();
 
     return () => {
       clearInterval(interval);
+      unsubTabs();
     };
   }, []);
 
@@ -219,74 +228,24 @@ export function Editor() {
   const handleEditorChange = (newContent: string) => {
     if (!activeTab) return;
 
-    // update service (which will notify subscribers) and persist to backend
     editorService.updateContent(newContent);
-    const updatedActiveTab = { ...activeTab, content: newContent };
-    setActiveTab(updatedActiveTab);
-    setTabs(tabs.map(tab => tab.id === activeTab.id ? updatedActiveTab : tab));
-    invoke('update_tab_content', { id: activeTab.id, content: newContent });
+    tabsService.updateTabContent(activeTab.id, newContent);
   };
 
   const handleAddTab = async () => {
     try {
-      const newTab = await invoke('add_tab');
-      const updatedTabs: any = await invoke('get_tabs');
-      setTabs(updatedTabs);
-      setActiveTab(newTab);
-      if (newTab) editorService.open(newTab as any);
+      await tabsService.addTab();
     } catch (error) {
-      console.error("add tab error:", error);
+      console.error("addtab error:", error);
     }
   };
 
   const handleTabClick = async (id: number) => {
-    if (hoverTimeout.current) {
-      clearTimeout(hoverTimeout.current);
-    }
-    setShowCloseButton(null);
     try {
-      await invoke('set_active_tab', { id });
-      const newActiveTab = tabs.find(t => t.id === id);
-      if (newActiveTab) {
-        setActiveTab(newActiveTab);
-        editorService.open(newActiveTab as any);
-      }
+      await tabsService.setActiveTab(id);
     } catch (error) {
-      console.error("active tab error:", error);
+      console.error("setActiveTab error:", error);
     }
-  };
-
-  const handleTabMouseEnter = (id: number) => {
-    hoverTimeout.current = window.setTimeout(() => {
-      setShowCloseButton(id);
-    }, 500);
-  };
-
-  const handleTabMouseLeave = () => {
-    if (hoverTimeout.current) {
-      clearTimeout(hoverTimeout.current);
-    }
-    setShowCloseButton(null);
-  };
-
-    const handleCloseTab = (id: number) => {
-    setClosingTabId(id);
-
-    setTimeout(async () => {
-      try {
-        const updatedTabs: any = await invoke('close_tab', { id });
-        setTabs(updatedTabs);
-        if (updatedTabs.length > 0) {
-          const newActiveTab = await invoke('get_active_tab');
-          setActiveTab(newActiveTab);
-        } else {
-          setActiveTab(null);
-        }
-      } catch (error) {
-        console.error("close tab error:", error);
-      }
-      setClosingTabId(null);
-    }, 300);
   };
 
   const handleRenameTab = async () => {
@@ -302,13 +261,9 @@ export function Editor() {
     const tabToRename = tabs.find(t => t.id === id);
     if (tabToRename && tabToRename.title !== title) {
       try {
-        await invoke('rename_tab', { id, newTitle: title });
-        const updatedTabs = tabs.map(t =>
-          t.id === id ? { ...t, title: title } : t
-        );
-        setTabs(updatedTabs);
+        await tabsService.renameTab(id, title);
       } catch (error) {
-        console.error("rename tab error:", error);
+        console.error("renameTab error:", error);
       }
     }
     setRenamingTab(null);
@@ -337,80 +292,71 @@ export function Editor() {
     handleExecuteRef.current();
   }, [isConnected, activeTab], { enabled: true, enableOnTags: ['INPUT', 'TEXTAREA', 'SELECT'], preventDefault: true });
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = tabs.findIndex((tab) => tab.id === active.id);
+      const newIndex = tabs.findIndex((tab) => tab.id === over.id);
+
+      const newTabs = arrayMove(tabs, oldIndex, newIndex);
+      setTabs(newTabs);
+
+      try {
+        await tabsService.reorderTabs(newTabs.map((tab) => tab.id));
+      } catch (error) {
+        console.error('reorderTabs error:', error);
+        setTabs(tabs);
+      }
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-transparent">
-                  <div className={theme.combine("flex items-center border-b", theme.border.primary)}>
-        {tabs.map(tab => {
-          const isActive = activeTab?.id === tab.id;
-          const isRenaming = renamingTab?.id === tab.id;
-
-          return (
-            <div
-              key={tab.id}
-              onClick={() => handleTabClick(tab.id)}
-              onDoubleClick={(e) => {
-                const titleElement = e.currentTarget.querySelector('span');
-                const initialWidth = titleElement ? titleElement.offsetWidth : 60;
-                setRenamingTab({ id: tab.id, title: tab.title, initialWidth });
-              }}
-              onMouseEnter={() => handleTabMouseEnter(tab.id)}
-              onMouseLeave={handleTabMouseLeave}
-              className={theme.combine(
-                "relative flex items-center h-7 cursor-pointer text-sm border-r transition-all duration-200 ease-in-out",
-                isActive ? theme.bg.secondary : "bg-transparent",
-                isActive ? theme.text.primary : theme.text.secondary,
-                isActive ? "font-medium" : "font-normal",
-                `border-b ${theme.border.primary}`,
-                closingTabId === tab.id ? 'tab-closing' : '',
-                showCloseButton === tab.id && !isRenaming ? 'px-3 pr-8' : 'px-3'
-              )}
-              style={{ marginBottom: '-1px' }}
-            >
-              {isRenaming && renamingTab ? (
-                <input
-                  type="text"
-                  value={renamingTab.title}
-                  autoComplete="off"
-                  onChange={(e) => {
-                    if (e.target.value.length <= 24) {
-                      setRenamingTab({ ...renamingTab, title: e.target.value });
-                    }
-                  }}
-                  onBlur={handleRenameTab}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleRenameTab();
-                    } else if (e.key === 'Escape') {
-                      setRenamingTab(null);
-                    }
-                  }}
-                  autoFocus
-                  className="bg-transparent border-none outline-none text-sm h-full p-0 m-0"
-                  style={{
-                    color: isActive ? rawColors.text.primary : rawColors.text.secondary,
-                    width: `calc(${renamingTab.initialWidth}px + 2ch)`,
-                    minWidth: `${renamingTab.initialWidth}px`
-                  }}
-                />
-              ) : (
-                <span>{tab.title}</span>
-              )}
-              {!isRenaming && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }}
-                  className={theme.combine(
-                    "absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity duration-300 ease-in-out",
-                    showCloseButton === tab.id ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
-                    theme.bg.hover
-                  )}
-                >
-                  <X size={14} className={theme.text.muted} />
-                </button>
-              )}
-            </div>
-          );
-        })}
-                <button
+      <div className={theme.combine("flex items-center border-b", theme.border.primary)}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={tabs.map((tab) => tab.id)}
+            strategy={horizontalListSortingStrategy}
+          >
+            {tabs.map((tab) => (
+              <SortableTab
+                key={tab.id}
+                tab={tab}
+                isActive={activeTab?.id === tab.id}
+                isRenaming={renamingTab?.id === tab.id}
+                renamingTab={renamingTab}
+                theme={theme}
+                rawColors={rawColors}
+                onTabClick={handleTabClick}
+                onTabDoubleClick={(id: number, title: string, initialWidth: number) =>
+                  setRenamingTab({ id, title, initialWidth })
+                }
+                onRenameChange={(title: string) =>
+                  renamingTab && setRenamingTab({ ...renamingTab, title })
+                }
+                onRenameSubmit={handleRenameTab}
+                onRenameCancel={() => setRenamingTab(null)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+        <button
           onClick={handleAddTab}
           className={theme.combine(
             "px-2 h-7 text-sm border-r border-b",
@@ -510,3 +456,116 @@ export function Editor() {
   );
 }
 
+interface SortableTabProps {
+  tab: any;
+  isActive: boolean;
+  isRenaming: boolean;
+  renamingTab: { id: number; title: string; initialWidth: number } | null;
+  theme: any;
+  rawColors: any;
+  onTabClick: (id: number) => void;
+  onTabDoubleClick: (id: number, title: string, initialWidth: number) => void;
+  onRenameChange: (title: string) => void;
+  onRenameSubmit: () => void;
+  onRenameCancel: () => void;
+}
+
+function SortableTab({
+  tab,
+  isActive,
+  isRenaming,
+  renamingTab,
+  theme,
+  rawColors,
+  onTabClick,
+  onTabDoubleClick,
+  onRenameChange,
+  onRenameSubmit,
+  onRenameCancel,
+}: SortableTabProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ 
+    id: tab.id,
+    disabled: isRenaming,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? 'none' : transition,
+    opacity: isDragging ? 0.8 : 1,
+    marginBottom: '-1px',
+    zIndex: isDragging ? 1000 : 'auto',
+    cursor: isRenaming ? 'text' : isDragging ? 'grabbing' : 'grab',
+  };
+
+  const handleClick = () => {
+    if (!isRenaming) {
+      onTabClick(tab.id);
+    }
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (!isRenaming) {
+      const titleElement = e.currentTarget.querySelector('span');
+      const initialWidth = titleElement ? titleElement.offsetWidth : 60;
+      onTabDoubleClick(tab.id, tab.title, initialWidth);
+    }
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...(isRenaming ? {} : listeners)}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      className={theme.combine(
+        "relative flex items-center h-7 text-sm border-r select-none",
+        isActive ? theme.bg.secondary : "bg-transparent",
+        isActive ? theme.text.primary : theme.text.secondary,
+        isActive ? "font-medium" : "font-normal",
+        `border-b ${theme.border.primary}`,
+        isDragging ? 'shadow-lg' : '',
+        'px-3'
+      )}
+    >
+      {isRenaming && renamingTab ? (
+        <input
+          type="text"
+          value={renamingTab.title}
+          autoComplete="off"
+          onChange={(e) => {
+            if (e.target.value.length <= 24) {
+              onRenameChange(e.target.value);
+            }
+          }}
+          onBlur={onRenameSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              onRenameSubmit();
+            } else if (e.key === 'Escape') {
+              onRenameCancel();
+            }
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          autoFocus
+          className="bg-transparent border-none outline-none text-sm h-full p-0 m-0 cursor-text"
+          style={{
+            color: isActive ? rawColors.text.primary : rawColors.text.secondary,
+            width: `calc(${renamingTab.initialWidth}px + 2ch)`,
+            minWidth: `${renamingTab.initialWidth}px`
+          }}
+        />
+      ) : (
+        <span className="pointer-events-none">{tab.title}</span>
+      )}
+    </div>
+  );
+}
