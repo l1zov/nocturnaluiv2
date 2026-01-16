@@ -21,7 +21,7 @@ class TabsServiceClass {
     try {
       await this.fetchTabs();
     } catch (error) {
-      console.error('init error:', error);
+      console.error('[TabsService.init]', error);
     }
   }
 
@@ -48,7 +48,7 @@ class TabsServiceClass {
       this.notify();
       return tabs;
     } catch (error) {
-      console.error('fetchTabs error:', error);
+      console.error('[TabsService.fetchTabs]', error);
       return [];
     }
   }
@@ -59,7 +59,7 @@ class TabsServiceClass {
       await this.fetchTabs();
       return newTab;
     } catch (error) {
-      console.error('addTab error:', error);
+      console.error('[TabsService.addTab]', error);
       throw error;
     }
   }
@@ -69,7 +69,7 @@ class TabsServiceClass {
       await invoke<Tab[]>('close_tab', { id });
       await this.fetchTabs();
     } catch (error) {
-      console.error('closeTab error:', error);
+      console.error('[TabsService.closeTab]', { id }, error);
       throw error;
     }
   }
@@ -80,7 +80,7 @@ class TabsServiceClass {
       this.activeTabId = id;
       this.notify();
     } catch (error) {
-      console.error('setActiveTab error:', error);
+      console.error('[TabsService.setActiveTab]', { id }, error);
       throw error;
     }
   }
@@ -94,7 +94,7 @@ class TabsServiceClass {
         this.notify();
       }
     } catch (error) {
-      console.error('renameTab error:', error);
+      console.error('[TabsService.renameTab]', { id, newTitle }, error);
       throw error;
     }
   }
@@ -108,7 +108,7 @@ class TabsServiceClass {
         this.notify();
       }
     } catch (error) {
-      console.error('updateTabContent error:', error);
+      console.error('[TabsService.updateTabContent]', { id }, error);
       throw error;
     }
   }
@@ -120,7 +120,7 @@ class TabsServiceClass {
       this.notify();
       return reorderedTabs;
     } catch (error) {
-      console.error('reorderTabs error:', error);
+      console.error('[TabsService.reorderTabs]', { count: tabIds.length }, error);
       throw error;
     }
   }

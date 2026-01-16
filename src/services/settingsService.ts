@@ -31,20 +31,21 @@ class SettingsServiceClass {
 
   private save() {
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.settings))
-    } catch (e) {
-      // ignore
+      localStorage.setItem(this.storageKey, JSON.stringify(this.settings));
+    } catch (error) {
+      console.error('[SettingsService.save]', error);
     }
   }
 
   private load() {
     try {
-      const raw = localStorage.getItem(this.storageKey)
-      if (!raw) return
-      const parsed = JSON.parse(raw) as Partial<Settings>
-      this.settings = { ...DEFAULTS, ...parsed }
-    } catch (e) {
-      this.settings = { ...DEFAULTS }
+      const raw = localStorage.getItem(this.storageKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as Partial<Settings>;
+      this.settings = { ...DEFAULTS, ...parsed };
+    } catch (error) {
+      console.error('[SettingsService.load]', error);
+      this.settings = { ...DEFAULTS };
     }
   }
 
@@ -89,8 +90,10 @@ class SettingsServiceClass {
 
   clearStorage() {
     try {
-      localStorage.removeItem(this.storageKey)
-    } catch (e) {}
+      localStorage.removeItem(this.storageKey);
+    } catch (error) {
+      console.error('[SettingsService.clearStorage]', error);
+    }
   }
 }
 

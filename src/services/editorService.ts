@@ -105,29 +105,31 @@ class EditorServiceClass {
   }
 
   private saveToStorage() {
+    if (!this.doc) return;
     try {
-      if (!this.doc) return
-      localStorage.setItem(this.autosaveKey, JSON.stringify(this.doc))
-    } catch (e) {
-      // ignore storage errors
+      localStorage.setItem(this.autosaveKey, JSON.stringify(this.doc));
+    } catch (error) {
+      console.error('[EditorService.saveToStorage]', error);
     }
   }
 
   private loadFromStorage() {
     try {
-      const raw = localStorage.getItem(this.autosaveKey)
-      if (!raw) return
-      const parsed = JSON.parse(raw) as EditorDocument
-      this.doc = parsed
-    } catch (e) {
-      // ignore
+      const raw = localStorage.getItem(this.autosaveKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as EditorDocument;
+      this.doc = parsed;
+    } catch (error) {
+      console.error('[EditorService.loadFromStorage]', error);
     }
   }
 
   clearStorage() {
     try {
-      localStorage.removeItem(this.autosaveKey)
-    } catch (e) {}
+      localStorage.removeItem(this.autosaveKey);
+    } catch (error) {
+      console.error('[EditorService.clearStorage]', error);
+    }
   }
 }
 

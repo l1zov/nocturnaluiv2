@@ -41,37 +41,7 @@ import '../themes/ace-frappe-mist';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import ace from 'ace-builds';
 
-try {
-  ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict');
-} catch (e) {
-}
-
-let suggestionCache: any[] = [];
-let suggestionsFetched = false;
-
-async function fetchSuggestions(): Promise<any[]> {
-  if (suggestionsFetched) {
-    return suggestionCache;
-  }
-  try {
-    await suggestionService.loadSuggestions();
-    const data: any[] = suggestionService.getSuggestions();
-    if (Array.isArray(data)) {
-      suggestionCache = data;
-    } else {
-      suggestionCache = [];
-    }
-    suggestionsFetched = true;
-    return suggestionCache;
-  } catch (error) {
-    console.error(error);
-    suggestionsFetched = true;
-    suggestionCache = [];
-    return [];
-  }
-}
-
-fetchSuggestions();
+ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict');
 
 export function Editor() {
   const { currentTheme } = useTheme();
@@ -87,7 +57,9 @@ export function Editor() {
   const initialSettings = settingsService.get();
   const [fontFamily, setFontFamily] = useState<string>(initialSettings.fontFamily as string);
   const [fontSize, setFontSize] = useState<number>(initialSettings.fontSize as number);
-  const [showLineNumbers, setShowLineNumbers] = useState<boolean>(Boolean(initialSettings.showLineNumbers));
+  const [showLineNumbers, setShowLineNumbers] = useState<boolean>(!!initialSettings.showLineNumbers);
+  const suggestionCacheRef = useRef<any[]>([]);
+  const suggestionsFetchedRef = useRef<boolean>(false);
 
   useEffect(() => {
     const unsub = editorService.subscribe((doc) => {
@@ -124,13 +96,9 @@ export function Editor() {
     `;
 
     return () => {
-      try {
-        unsub && unsub()
-      } catch (e) {}
-      try {
-        if (styleElement && styleElement.parentNode) styleElement.parentNode.removeChild(styleElement)
-      } catch (e) {}
-    }
+      unsub?.();
+      styleElement?.parentNode?.removeChild(styleElement);
+    };
   }, []);
 
   useEffect(() => {
@@ -169,10 +137,28 @@ export function Editor() {
   }, [rawColors]);
 
   useEffect(() => {
+    const fetchSuggestions = async (): Promise<any[]> => {
+      if (suggestionsFetchedRef.current) {
+        return suggestionCacheRef.current;
+      }
+      try {
+        await suggestionService.loadSuggestions();
+        const data = suggestionService.getSuggestions();
+        suggestionCacheRef.current = Array.isArray(data) ? data : [];
+        suggestionsFetchedRef.current = true;
+        return suggestionCacheRef.current;
+      } catch (error) {
+        console.error('[Editor.fetchSuggestions]', error);
+        suggestionsFetchedRef.current = true;
+        suggestionCacheRef.current = [];
+        return [];
+      }
+    };
+
     const langTools = ace.require('ace/ext/language_tools');
 
     const luaCompleter = {
-            getCompletions: async (_editor: any, _session: any, _pos: any, _prefix: any, callback: any) => {
+      getCompletions: async (_editor: any, _session: any, _pos: any, _prefix: any, callback: any) => {
         const suggestions = await fetchSuggestions();
         callback(null, suggestions.map((s: any) => ({
           caption: s.label,
@@ -218,9 +204,9 @@ export function Editor() {
     const unsub = settingsService.subscribe((s) => {
       setFontFamily(s.fontFamily as string);
       setFontSize(s.fontSize as number);
-      setShowLineNumbers(Boolean(s.showLineNumbers));
+      setShowLineNumbers(!!s.showLineNumbers);
     });
-    return () => unsub && unsub();
+    return () => unsub?.();
   }, []);
 
   
@@ -236,7 +222,7 @@ export function Editor() {
     try {
       await tabsService.addTab();
     } catch (error) {
-      console.error("addtab error:", error);
+      console.error('[Editor.handleAddTab]', error);
     }
   };
 
@@ -244,7 +230,7 @@ export function Editor() {
     try {
       await tabsService.setActiveTab(id);
     } catch (error) {
-      console.error("setActiveTab error:", error);
+      console.error('[Editor.handleTabClick]', { id }, error);
     }
   };
 
@@ -252,21 +238,18 @@ export function Editor() {
     if (!renamingTab) return;
 
     const { id, title } = renamingTab;
+    setRenamingTab(null);
 
-    if (title.trim() === '') {
-      setRenamingTab(null);
-      return;
-    }
+    if (title.trim() === '') return;
 
     const tabToRename = tabs.find(t => t.id === id);
     if (tabToRename && tabToRename.title !== title) {
       try {
         await tabsService.renameTab(id, title);
       } catch (error) {
-        console.error("renameTab error:", error);
+        console.error('[Editor.handleRenameTab]', { id, title }, error);
       }
     }
-    setRenamingTab(null);
   };
 
   const handleClear = () => {
@@ -280,7 +263,7 @@ export function Editor() {
     try {
       await invoke('execute_script_command', { script: activeTab.content });
     } catch (error) {
-      console.error('script not executed:', error);
+      console.error('[Editor.handleExecute]', { tabId: activeTab.id }, error);
     }
   };
 
@@ -316,7 +299,7 @@ export function Editor() {
       try {
         await tabsService.reorderTabs(newTabs.map((tab) => tab.id));
       } catch (error) {
-        console.error('reorderTabs error:', error);
+        console.error('[Editor.handleDragEnd]', error);
         setTabs(tabs);
       }
     }
