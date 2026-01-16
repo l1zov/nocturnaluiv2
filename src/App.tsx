@@ -11,7 +11,7 @@ import { Editor } from './pages/Editor';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dracula">
+    <ThemeProvider>
       <Router>
         <Routes>
           <Route path="/*" element={<MainLayout />} />

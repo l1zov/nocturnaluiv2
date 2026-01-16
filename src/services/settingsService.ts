@@ -1,3 +1,5 @@
+import { invoke } from '@tauri-apps/api/core';
+
 export type Settings = {
   theme: string
   fontFamily: string
@@ -9,7 +11,7 @@ export type Settings = {
 }
 
 const DEFAULTS: Settings = {
-  theme: 'system',
+  theme: 'default',
   fontFamily: 'Fira Code',
   fontSize: 16,
   autosave: true,
@@ -23,29 +25,39 @@ class SettingsServiceClass {
   private storageKey = 'settings'
   private settings: Settings
   private listeners: Listener[] = []
+  private initialized = false
 
   constructor() {
     this.settings = { ...DEFAULTS }
     this.load()
   }
 
-  private save() {
+  private async save() {
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.settings));
+      await invoke('save_settings', {
+        key: this.storageKey,
+        value: JSON.stringify(this.settings)
+      });
     } catch (error) {
       console.error('[SettingsService.save]', error);
     }
   }
 
-  private load() {
+  private async load() {
     try {
-      const raw = localStorage.getItem(this.storageKey);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as Partial<Settings>;
-      this.settings = { ...DEFAULTS, ...parsed };
+      const raw = await invoke<string | null>('load_settings', {
+        key: this.storageKey
+      });
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<Settings>;
+        this.settings = { ...DEFAULTS, ...parsed };
+      }
     } catch (error) {
       console.error('[SettingsService.load]', error);
       this.settings = { ...DEFAULTS };
+    } finally {
+      this.initialized = true;
+      this.emit();
     }
   }
 
@@ -77,7 +89,9 @@ class SettingsServiceClass {
 
   subscribe(fn: Listener) {
     this.listeners.push(fn)
-    fn(this.get())
+    if (this.initialized) {
+      fn(this.get())
+    }
     return () => {
       this.listeners = this.listeners.filter((l) => l !== fn)
     }
@@ -86,14 +100,6 @@ class SettingsServiceClass {
   private emit() {
     const snapshot = this.get()
     this.listeners.forEach((l) => l(snapshot))
-  }
-
-  clearStorage() {
-    try {
-      localStorage.removeItem(this.storageKey);
-    } catch (error) {
-      console.error('[SettingsService.clearStorage]', error);
-    }
   }
 }
 
