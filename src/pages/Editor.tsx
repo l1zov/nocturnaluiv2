@@ -6,7 +6,7 @@ import { useThemeRawColors } from '../hooks/useThemeRawColors';
 import useHotkey from '../hooks/useHotkey';
 import { invoke } from '@tauri-apps/api/core';
 import { suggestionService } from '../services/suggestionService';
-import { editorService, settingsService, tabsService } from '../services';
+import { settingsService, tabsService } from '../services';
 import {
   DndContext,
   closestCenter,
@@ -62,11 +62,6 @@ export function Editor() {
   const suggestionsFetchedRef = useRef<boolean>(false);
 
   useEffect(() => {
-    const unsub = editorService.subscribe((doc) => {
-      if (doc) {
-        setActiveTab((prev: any) => (prev && prev.id === doc.id ? { ...prev, content: doc.content } : { ...doc }));
-      }
-    });
     const styleId = 'dynamic-scrollbar-styles';
     let styleElement = document.getElementById(styleId) as HTMLStyleElement | null;
 
@@ -96,7 +91,6 @@ export function Editor() {
     `;
 
     return () => {
-      unsub?.();
       styleElement?.parentNode?.removeChild(styleElement);
     };
   }, []);
@@ -188,7 +182,6 @@ export function Editor() {
       const activeTab = tabs.find(t => t.id === activeTabId);
       if (activeTab) {
         setActiveTab(activeTab);
-        editorService.open(activeTab as any);
       }
     });
 
@@ -214,7 +207,6 @@ export function Editor() {
   const handleEditorChange = (newContent: string) => {
     if (!activeTab) return;
 
-    editorService.updateContent(newContent);
     tabsService.updateTabContent(activeTab.id, newContent);
   };
 
