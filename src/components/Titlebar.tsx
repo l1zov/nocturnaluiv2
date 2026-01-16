@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
-import { initializeWindowFocusListener } from '../services/windowFocusService';
+import { initializeWindowFocusListener } from '../services';
+import { windowControlsService } from '../services';
 import { useTitlebarStore } from '../store/titlebarStore';
 import {
   TrafficLightUnfocusedSVG,
@@ -86,13 +87,7 @@ export function Titlebar() {
       </div>
       <div className="flex items-center space-x-2">
         <button
-          onClick={async () => {
-            try {
-              await invoke('close_window');
-            } catch (error) {
-              console.error(error);
-            }
-          }}
+          onClick={() => windowControlsService.closeWindow()}
           onMouseEnter={() => setHoveredButton('close')}
           onMouseLeave={() => setHoveredButton(null)}
           onMouseDown={() => setPressedButton('close')}
@@ -109,13 +104,7 @@ export function Titlebar() {
           )}
         </button>
         <button
-          onClick={async () => {
-            try {
-              await invoke('minimize_window');
-            } catch (error) {
-              console.error(error);
-            }
-          }}
+          onClick={() => windowControlsService.minimizeWindow()}
           onMouseEnter={() => setHoveredButton('minimize')}
           onMouseLeave={() => setHoveredButton(null)}
           onMouseDown={() => setPressedButton('minimize')}
@@ -132,13 +121,7 @@ export function Titlebar() {
           )}
         </button>
         <button
-          onClick={async () => {
-            try {
-              await invoke('toggle_maximize_window');
-            } catch (error) {
-              console.error(error);
-            }
-          }}
+          onClick={() => windowControlsService.toggleMaximize()}
           onMouseEnter={() => setHoveredButton('maximize')}
           onMouseLeave={() => setHoveredButton(null)}
           onMouseDown={() => setPressedButton('maximize')}
