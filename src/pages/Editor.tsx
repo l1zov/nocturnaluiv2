@@ -527,11 +527,12 @@ function SortableTab({
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       className={theme.combine(
-        "relative flex items-center h-7 text-sm border-r select-none",
+        "relative flex items-center h-7 text-sm select-none",
         isActive ? theme.bg.secondary : "bg-transparent",
         isActive ? theme.text.primary : theme.text.secondary,
         isActive ? "font-medium" : "font-normal",
-        `border-b ${theme.border.primary}`,
+        `border ${theme.border.primary}`,
+        isDragging && !isActive ? '' : 'border-l-transparent border-t-transparent',
         isDragging ? 'shadow-lg' : '',
         'px-3'
       )}
