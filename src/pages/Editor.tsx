@@ -6,7 +6,7 @@ import { useThemeRawColors } from '../hooks/useThemeRawColors';
 import useHotkey from '../hooks/useHotkey';
 import { invoke } from '@tauri-apps/api/core';
 import { suggestionService, settingsService, tabsService } from '../services';
-import type { Tab, RenamingTabState, Suggestion, SortableTabProps } from '../types';
+import type { Tab, RenamingTabState, AceCompletion, SortableTabProps } from '../types';
 import {
   DndContext,
   closestCenter,
@@ -60,7 +60,7 @@ export function Editor() {
   const [fontFamily, setFontFamily] = useState<string>(initialSettings.fontFamily as string);
   const [fontSize, setFontSize] = useState<number>(initialSettings.fontSize as number);
   const [showLineNumbers, setShowLineNumbers] = useState<boolean>(!!initialSettings.showLineNumbers);
-  const suggestionCacheRef = useRef<Suggestion[]>([]);
+  const suggestionCacheRef = useRef<AceCompletion[]>([]);
   const suggestionsFetchedRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -156,12 +156,7 @@ export function Editor() {
     const luaCompleter = {
       getCompletions: async (_editor: any, _session: any, _pos: any, _prefix: any, callback: any) => {
         const suggestions = await fetchSuggestions();
-        callback(null, suggestions.map((s: any) => ({
-          caption: s.label,
-          value: s.label,
-          meta: s.detail || 'keyword',
-          docHTML: s.documentation,
-        })));
+        callback(null, suggestions);
       },
     };
 
