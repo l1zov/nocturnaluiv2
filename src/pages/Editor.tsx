@@ -154,9 +154,60 @@ export function Editor() {
     const langTools = ace.require('ace/ext/language_tools');
 
     const luaCompleter = {
-      getCompletions: async (_editor: any, _session: any, _pos: any, _prefix: any, callback: any) => {
-        const suggestions = await fetchSuggestions();
-        callback(null, suggestions);
+      getCompletions: async (_editor: any, _session: any, _pos: any, prefix: any, callback: any) => {
+        if (!prefix || prefix.length < 2) {
+          callback(null, []);
+          return;
+        }
+
+        const allSuggestions = await fetchSuggestions();
+        const prefixLower = prefix.toLowerCase();
+
+        const fuzzyScore = (caption: string): number => {
+          const captionLower = caption.toLowerCase();
+          let score = 0;
+          let prefixIdx = 0;
+          let consecutiveMatches = 0;
+          let lastMatchIdx = -1;
+
+          for (let i = 0; i < captionLower.length && prefixIdx < prefixLower.length; i++) {
+            if (captionLower[i] === prefixLower[prefixIdx]) {
+              score += 1;
+
+              if (lastMatchIdx === i - 1) {
+                consecutiveMatches++;
+                score += consecutiveMatches * 2;
+              } else {
+                consecutiveMatches = 0;
+              }
+
+              if (i === 0) score += 10;
+
+              if (i > 0) {
+                const prevChar = caption[i - 1];
+                if (prevChar === '.' || prevChar === '_' || prevChar === ':') {
+                  score += 5;
+                } else if (caption[i] === caption[i].toUpperCase() && caption[i] !== caption[i].toLowerCase()) {
+                  score += 3;
+                }
+              }
+              lastMatchIdx = i;
+              prefixIdx++;
+            }
+          }
+          return prefixIdx === prefixLower.length ? score : 0;
+        };
+
+        const scored = allSuggestions
+          .map((s: any) => ({ ...s, score: fuzzyScore(s.caption) }))
+          .filter((s: any) => s.score > 0);
+
+        scored.sort((a: any, b: any) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return a.caption.localeCompare(b.caption);
+        });
+
+        callback(null, scored.slice(0, 12));
       },
     };
 

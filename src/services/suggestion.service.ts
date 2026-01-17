@@ -38,8 +38,9 @@ class SuggestionServiceClass {
     private buildSuggestions(): AceCompletion[] {
         return (suggestions as RawSuggestion[]).map((item) => ({
             caption: item.caption,
-            value: item.snippet ?? item.value,
+            value: item.value,
             meta: item.meta,
+            score: 1000,
             docHTML: item.docText ? `<p>${item.docText}</p>` : undefined,
         }));
     }
