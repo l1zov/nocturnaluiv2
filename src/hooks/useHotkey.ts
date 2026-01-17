@@ -1,14 +1,8 @@
 import { useCallback } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import type { UseHotkeyOptions } from '../types';
 
-export type UseHotkeyOptions = {
-  enabled?: boolean;
-  keyEvent?: 'keydown' | 'keyup' | 'keypress';
-  enableOnTags?: string[];
-  preventDefault?: boolean;
-  stopPropagation?: boolean;
-  filter?: (event: KeyboardEvent) => boolean;
-};
+export type { UseHotkeyOptions };
 
 export default function useHotkey(
   keys: string | string[],

@@ -1,4 +1,5 @@
 import { useTheme } from '../context/ThemeContext';
+import type { ThemeRawColorsReturn } from '../types';
 
 function extractColor(cssClass: string): string {
   if (!cssClass) return '';
@@ -6,7 +7,7 @@ function extractColor(cssClass: string): string {
   return match ? match[0] : '';
 }
 
-export function useThemeRawColors() {
+export function useThemeRawColors(): ThemeRawColorsReturn {
   const { currentTheme } = useTheme();
   const { colors } = currentTheme;
 
@@ -27,7 +28,7 @@ export function useThemeRawColors() {
       accent: extractColor(colors.border.accent),
     },
     accent: {
-        primary: extractColor(colors.accent.primary),
+      primary: extractColor(colors.accent.primary),
     }
   };
 

@@ -1,21 +1,13 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Theme } from '../types/theme';
+import type { ThemeName, ThemeContextValue } from '../types';
 import { themes } from '../themes';
 import { settingsService } from '../services';
 
-type AvailableThemes = keyof typeof themes;
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-interface ThemeContextType {
-  currentTheme: Theme;
-  themeName: AvailableThemes;
-  setTheme: (themeName: AvailableThemes) => void;
-  loading: boolean;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
-export function useTheme() {
+export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
@@ -25,47 +17,47 @@ export function useTheme() {
 
 interface ThemeProviderProps {
   children: ReactNode;
-  defaultTheme?: AvailableThemes;
+  defaultTheme?: ThemeName;
 }
 
 export function ThemeProvider({ children, defaultTheme = 'default' }: ThemeProviderProps) {
-  const [themeName, setThemeName] = useState<AvailableThemes>(defaultTheme);
+  const [themeName, setThemeName] = useState<ThemeName>(defaultTheme);
   const [loading, setLoading] = useState(true);
   const currentTheme = themes[themeName] || themes.default;
 
   useEffect(() => {
     try {
       const s = settingsService.get();
-      if (s.theme && themes[s.theme as AvailableThemes]) {
-        setThemeName(s.theme as AvailableThemes);
+      if (s.theme && themes[s.theme as ThemeName]) {
+        setThemeName(s.theme as ThemeName);
       }
     } catch (e) {
       invoke<string>('load_settings', { key: 'theme' })
         .then(savedTheme => {
-          if (savedTheme && themes[savedTheme as AvailableThemes]) {
-            setThemeName(savedTheme as AvailableThemes);
+          if (savedTheme && themes[savedTheme as ThemeName]) {
+            setThemeName(savedTheme as ThemeName);
           }
         })
-        .catch(() => {})
+        .catch(() => { })
     } finally {
       setLoading(false);
     }
 
     const unsub = settingsService.subscribe((s) => {
-      if (s.theme && themes[s.theme as AvailableThemes]) {
-        setThemeName(s.theme as AvailableThemes);
+      if (s.theme && themes[s.theme as ThemeName]) {
+        setThemeName(s.theme as ThemeName);
       }
     });
 
     return () => unsub && unsub();
   }, []);
 
-  const setTheme = (newThemeName: AvailableThemes) => {
+  const setTheme = (newThemeName: ThemeName) => {
     setThemeName(newThemeName);
     try {
       settingsService.setKey('theme', newThemeName);
-    } catch (e) {}
-    invoke('save_settings', { key: 'theme', value: newThemeName }).catch(() => {});
+    } catch (e) { }
+    invoke('save_settings', { key: 'theme', value: newThemeName }).catch(() => { });
   };
 
   return (

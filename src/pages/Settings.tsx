@@ -4,6 +4,7 @@ import { ChevronDownIcon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { themes } from '../themes';
 import { useThemeClasses } from '../hooks/useThemeClasses';
+import type { ThemeName } from '../types';
 // import { settingsService, DEFAULT_SETTINGS } from '../services';
 
 export function Settings() {
@@ -44,7 +45,7 @@ export function Settings() {
     `;
 
     return () => {
-      try { styleEl && styleEl.parentNode?.removeChild(styleEl); } catch (e) {}
+      try { styleEl && styleEl.parentNode?.removeChild(styleEl); } catch (e) { }
     };
   }, []);
 
@@ -98,7 +99,7 @@ export function Settings() {
                   <Menu.Item key={theme}>
                     {({ active }) => (
                       <button
-                        onClick={() => setTheme(theme as keyof typeof themes)}
+                        onClick={() => setTheme(theme as ThemeName)}
                         className={`${themeClasses.combine(
                           active ? themeClasses.bg.active : '',
                           themeClasses.text.primary

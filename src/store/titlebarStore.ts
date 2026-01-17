@@ -1,15 +1,9 @@
 import { create } from 'zustand';
-
-interface TitlebarStore {
-  hoveredButton: string | null;
-  setHoveredButton: (button: string | null) => void;
-  pressedButton: string | null;
-  setPressedButton: (button: string | null) => void;
-}
+import type { TitlebarStore } from '../types';
 
 export const useTitlebarStore = create<TitlebarStore>((set) => ({
   hoveredButton: null,
-  setHoveredButton: (button: string | null) => set({ hoveredButton: button }),
+  setHoveredButton: (button) => set({ hoveredButton: button }),
   pressedButton: null,
-  setPressedButton: (button: string | null) => set({ pressedButton: button }),
+  setPressedButton: (button) => set({ pressedButton: button }),
 }));

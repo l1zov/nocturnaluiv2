@@ -1,9 +1,10 @@
 import { useTheme } from '../context/ThemeContext';
+import type { ThemeClassesReturn } from '../types';
 
-export function useThemeClasses() {
+export function useThemeClasses(): ThemeClassesReturn {
   const { currentTheme } = useTheme();
   const { colors } = currentTheme;
-  
+
   return {
     bg: {
       primary: colors.background.primary,

@@ -1,16 +1,17 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useThemeClasses } from '../hooks/useThemeClasses';
+import type { NavLink } from '../types';
 
 export function Sidebar() {
   const theme = useThemeClasses();
   const location = useLocation();
 
-  const navLinks = [
+  const navLinks: NavLink[] = [
     { href: '/', label: 'Home' },
     { href: '/editor', label: 'Editor' },
   ];
 
-  const bottomLinks = [
+  const bottomLinks: NavLink[] = [
     { href: '/settings', label: 'Settings' },
   ];
 

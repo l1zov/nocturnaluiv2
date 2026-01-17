@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
-import { initializeWindowFocusListener } from '../services';
-import { windowControlsService } from '../services';
+import { windowService } from '../services';
 import { useTitlebarStore } from '../store/titlebarStore';
+import type { ConnectionStatusPayload, WindowControlButton } from '../types';
 import {
   TrafficLightUnfocusedSVG,
   CloseNormalSVG,
@@ -36,15 +37,18 @@ export function Titlebar() {
         console.error(error);
       }
 
-      const unlisten = await listen<{ connected: boolean }>('connection-status-changed', (event) => {
+      const unlisten = await listen<ConnectionStatusPayload>('connection-status-changed', (event) => {
         setIsConnected(event.payload.connected);
       });
       unlistenFn = unlisten;
 
-      // Initialize window focus listener
-      cleanupFocusListener = await initializeWindowFocusListener((focused) => {
-        setIsWindowFocused(focused);
+      cleanupFocusListener = windowService.subscribe((state) => {
+        setIsWindowFocused(state.focused);
       });
+
+      if (!windowService.isInitialized()) {
+        await windowService.initializeFocusListeners();
+      }
     };
 
     setup();
@@ -61,12 +65,12 @@ export function Titlebar() {
 
   const renderTrafficLight = (
     isFocused: boolean,
-    pressedState: string | null,
-    hoveredState: string | null,
-    normalComponent: React.ReactNode,
-    hoverComponent: React.ReactNode,
-    pressedComponent: React.ReactNode
-  ) => {
+    pressedState: WindowControlButton | null,
+    hoveredState: WindowControlButton | null,
+    normalComponent: ReactNode,
+    hoverComponent: ReactNode,
+    pressedComponent: ReactNode
+  ): ReactNode => {
     if (!isFocused) {
       return <TrafficLightUnfocusedSVG />;
     }
@@ -87,7 +91,7 @@ export function Titlebar() {
       </div>
       <div className="flex items-center space-x-2">
         <button
-          onClick={() => windowControlsService.closeWindow()}
+          onClick={() => windowService.close()}
           onMouseEnter={() => setHoveredButton('close')}
           onMouseLeave={() => setHoveredButton(null)}
           onMouseDown={() => setPressedButton('close')}
@@ -104,7 +108,7 @@ export function Titlebar() {
           )}
         </button>
         <button
-          onClick={() => windowControlsService.minimizeWindow()}
+          onClick={() => windowService.minimize()}
           onMouseEnter={() => setHoveredButton('minimize')}
           onMouseLeave={() => setHoveredButton(null)}
           onMouseDown={() => setPressedButton('minimize')}
@@ -121,7 +125,7 @@ export function Titlebar() {
           )}
         </button>
         <button
-          onClick={() => windowControlsService.toggleMaximize()}
+          onClick={() => windowService.toggleMaximize()}
           onMouseEnter={() => setHoveredButton('maximize')}
           onMouseLeave={() => setHoveredButton(null)}
           onMouseDown={() => setPressedButton('maximize')}

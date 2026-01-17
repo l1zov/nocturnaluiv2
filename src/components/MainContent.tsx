@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import { APP_VERSION } from '../appVersion';
+import type { UpdateItem } from '../types';
 
 export function MainContent() {
   const theme = useThemeClasses();
   const [appVersion] = useState<string>(APP_VERSION);
-  
-  const updates = [
+
+  const updates: UpdateItem[] = [
     { version: '25.4.1', description: 'Join our discord server.' },
-    { version: 'dev 2', description: "Added Tabs Renaming. Fixes."},
+    { version: 'dev 2', description: "Added Tabs Renaming. Fixes." },
     { version: 'dev 1', description: 'v2 first dev version' },
   ];
 

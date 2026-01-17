@@ -5,8 +5,8 @@ import { useThemeClasses } from '../hooks/useThemeClasses';
 import { useThemeRawColors } from '../hooks/useThemeRawColors';
 import useHotkey from '../hooks/useHotkey';
 import { invoke } from '@tauri-apps/api/core';
-import { suggestionService } from '../services/suggestionService';
-import { settingsService, tabsService } from '../services';
+import { suggestionService, settingsService, tabsService } from '../services';
+import type { Tab, RenamingTabState, Suggestion, SortableTabProps } from '../types';
 import {
   DndContext,
   closestCenter,
@@ -43,22 +43,24 @@ import ace from 'ace-builds';
 
 ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict');
 
+type AceEditorInstance = Parameters<NonNullable<React.ComponentProps<typeof AceEditor>['onLoad']>>[0];
+
 export function Editor() {
   const { currentTheme } = useTheme();
   const theme = useThemeClasses();
   const rawColors = useThemeRawColors();
-  const [tabs, setTabs] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<any>(null);
+  const [tabs, setTabs] = useState<Tab[]>([]);
+  const [activeTab, setActiveTab] = useState<Tab | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
-  const [renamingTab, setRenamingTab] = useState<{ id: number; title: string; initialWidth: number } | null>(null);
-  const editorRef = useRef<any>(null);
-  const handleExecuteRef = useRef<() => void>(() => {});
+  const [renamingTab, setRenamingTab] = useState<RenamingTabState | null>(null);
+  const editorRef = useRef<AceEditorInstance | null>(null);
+  const handleExecuteRef = useRef<() => void>(() => { });
   const initialSettings = settingsService.get();
   const [fontFamily, setFontFamily] = useState<string>(initialSettings.fontFamily as string);
   const [fontSize, setFontSize] = useState<number>(initialSettings.fontSize as number);
   const [showLineNumbers, setShowLineNumbers] = useState<boolean>(!!initialSettings.showLineNumbers);
-  const suggestionCacheRef = useRef<any[]>([]);
+  const suggestionCacheRef = useRef<Suggestion[]>([]);
   const suggestionsFetchedRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -177,9 +179,9 @@ export function Editor() {
     checkConnection();
     const interval = setInterval(checkConnection, 1000);
 
-    const unsubTabs = tabsService.subscribe((tabs, activeTabId) => {
-      setTabs(tabs);
-      const activeTab = tabs.find(t => t.id === activeTabId);
+    const unsubTabs = tabsService.subscribe((state) => {
+      setTabs(state.tabs);
+      const activeTab = state.tabs.find(t => t.id === state.activeTabId);
       if (activeTab) {
         setActiveTab(activeTab);
       }
@@ -202,7 +204,7 @@ export function Editor() {
     return () => unsub?.();
   }, []);
 
-  
+
 
   const handleEditorChange = (newContent: string) => {
     if (!activeTab) return;
@@ -431,20 +433,6 @@ export function Editor() {
   );
 }
 
-interface SortableTabProps {
-  tab: any;
-  isActive: boolean;
-  isRenaming: boolean;
-  renamingTab: { id: number; title: string; initialWidth: number } | null;
-  theme: any;
-  rawColors: any;
-  onTabClick: (id: number) => void;
-  onTabDoubleClick: (id: number, title: string, initialWidth: number) => void;
-  onRenameChange: (title: string) => void;
-  onRenameSubmit: () => void;
-  onRenameCancel: () => void;
-}
-
 function SortableTab({
   tab,
   isActive,
@@ -465,7 +453,7 @@ function SortableTab({
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: tab.id,
     disabled: isRenaming,
   });
