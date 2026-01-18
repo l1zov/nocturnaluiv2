@@ -23,6 +23,8 @@ export type {
     SuggestionsData,
     AceCompleterCallback,
     AceCompletion,
+    AceCompleter,
+    AceLangTools,
 } from './suggestions';
 
 export type {

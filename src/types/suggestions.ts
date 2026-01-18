@@ -1,3 +1,5 @@
+import type { Ace } from 'ace-builds';
+
 export interface Suggestion {
     label: string;
     detail: string;
@@ -30,4 +32,19 @@ export interface AceCompletion {
     meta: string;
     docHTML?: string;
     score?: number;
+}
+
+export interface AceCompleter {
+    getCompletions: (
+        editor: Ace.Editor,
+        session: Ace.EditSession,
+        pos: Ace.Point,
+        prefix: string,
+        callback: AceCompleterCallback
+    ) => void;
+}
+
+export interface AceLangTools {
+    addCompleter: (completer: AceCompleter) => void;
+    setCompleters: (completers: AceCompleter[]) => void;
 }
