@@ -64,6 +64,12 @@ export type {
     AceCommand,
     EditorSettings,
     AceEditorProps,
+    TabBarProps,
+    SortableTabItemProps,
+    TabContextMenuProps,
+    AceEditorComponentProps,
+    EditorToolbarProps,
+    ContextMenuState,
 } from './editor';
 
 export type {
